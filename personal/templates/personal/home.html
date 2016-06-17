@@ -13,29 +13,16 @@
             margin: 20px; 
         }
     </style>
-    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
 
 	{% load staticfiles %}
+    <script type="text/javascript" src="{% static 'personal/js/Game.js' %}"></script>
     <script type="text/javascript" src="{% static 'personal/js/draw.js' %}"></script>
     <script type="text/javascript" src="{% static 'personal/js/ajax_csrf.js' %}"></script>
-    <script type="text/javascript">
-        function runAjax() {
-            console.log("Run!");
-            $.ajax({
-                type: "POST",
-                url: "/ajax/test/",
-                dataType: "json",
-                data: { "item": $(".todo-item").val() },
-                success: function(data) {
-                    alert(data);
-                }
-            });
-        }
-    </script>
 </head>
 <body>
     <canvas id="reversi_board" width="500px" height="500px"></canvas>
     <button id="button" name="button" onClick="runAjax()">Button</button>
-    <p id="result"></p>
+    <p id="turn">Black</p>
 </body>
 </html>
