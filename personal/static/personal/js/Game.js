@@ -1,6 +1,3 @@
-BLACK = 1;
-WHITE = 2;
-NONE  = 0;
 var directions = [
     {row: 0, col: 1},
     {row:-1, col: 1},
@@ -11,119 +8,123 @@ var directions = [
     {row: 1, col: 0},
     {row: 1, col: 1}
 ]
-var nextColor = BLACK;
 function Game(rows, cols){
     this.rows = rows;
     this.cols = cols;
+    this.NONE  = 0;
+    this.BLACK = 1;
+    this.WHITE = 2;
+    this.nextColor = this.BLACK;
 }
-Game.prototype.init = function(context){
+
+Game.prototype.init = function(){
     var upRow   = Math.floor((this.rows-1)/2);
     var leftCol = Math.floor((this.cols-1)/2);
     this.arrange = [];
     for (var i=0; i<this.rows; i++){
         this.arrange[i] = [];
         for (var j=0; j<this.cols; j++){
-            this.clearPiece(context, i, j);
+            this.clearPiece(i, j);
         }
     }
-    this.putPiece(context, upRow  , leftCol  , BLACK);
-    this.putPiece(context, upRow+1, leftCol  , WHITE);
-    this.putPiece(context, upRow  , leftCol+1, WHITE);
-    this.putPiece(context, upRow+1, leftCol+1, BLACK);
-};
-
-Game.prototype.clearPiece = function(context, row, col){
-    this.arrange[row][col] = NONE;
-    clearPiece(context, row, col);
+    this.putPiece(upRow  , leftCol  , this.BLACK);
+    this.putPiece(upRow+1, leftCol  , this.WHITE);
+    this.putPiece(upRow  , leftCol+1, this.WHITE);
+    this.putPiece(upRow+1, leftCol+1, this.BLACK);
 }
 
-Game.prototype.putPiece = function(context, row, col, color){
+Game.prototype.clearPiece = function(row, col){
+    this.arrange[row][col] = this.NONE;
+}
+
+Game.prototype.putPiece = function(row, col, color){
     this.arrange[row][col] = color;
-    putPiece(context, row, col, color);
-};
+}
 
 Game.prototype.canPutPiece = function(row, col, color){
-    if(this.arrange[row][col]!==NONE){
+    if(this.arrange[row][col]!==this.NONE){
         return false;
     }
-    for(var i=0; i<directions.length; i++){
-        if(this.canTurnPiece(row, col, color, directions[i]['row'], directions[i]['col'])){
-            return true;
-        }
+    if(this.getTurnPieceList(row, col, color).length>0){
+        return true;
     }
-    return false;
-};
+    return false;    
+}
+
 Game.prototype.isOutOfRange = function(row, col){
     if(row>=this.rows || col>=this.cols || row<0 || col<0){
         return true;
     }else{
         return false;
     }
-}
-Game.prototype.canTurnPiece = function(row, col, color, y, x){
-    if(this.isOutOfRange(row+y, col+x)){
-        return false;
-    }
-    // Checking the color of next cell
-    if(this.arrange[row+y][col+x]===color || this.arrange[row+y][col+x]===NONE){
-        return false;
-    }
-    var checkRow = row+2*y;
-    var checkCol = col+2*x;
-
-    while(!this.isOutOfRange(checkRow, checkCol)){
-        if(this.arrange[checkRow][checkCol]===color){
-            return true;
-        }
-        checkRow += y;
-        checkCol += x;        
-    }
-    return false;
 };
 
-Game.prototype.turnPiece = function(context, row, col, color){
+Game.prototype.getTurnPieceList = function(row, col, color){
+    var turnPieceList = [];
     for(var i=0; i<directions.length; i++){
-        if(this.turnPieceForDirect(context, row, col, color,  directions[i]['row'], directions[i]['col']));
+        var tmpTurnPieceList = this.getTurnPieceForDirect(row, col, color,  directions[i]['row'], directions[i]['col']);
+        if(tmpTurnPieceList.length>0){
+            for(var j=0; j<tmpTurnPieceList.length; j++){
+                turnPieceList.push({row:tmpTurnPieceList[j]['row'], col:tmpTurnPieceList[j]['col']});
+            }
+        }
     }
+    return turnPieceList;
 };
 
-Game.prototype.turnPieceForDirect = function(context, row, col, color, y, x){
+Game.prototype.getTurnPieceForDirect = function(row, col, color, y, x){
+    var turnPieceList = [];
     if(this.isOutOfRange(row+y, col+x)){
-        return false;
+        return [];
     }
     var checkRow = row+y;
     var checkCol = col+x;
-    if(this.arrange[checkRow][checkCol]===color || this.arrange[checkRow][checkCol]===NONE){
-        return false;
+    if(this.arrange[checkRow][checkCol]===color || this.arrange[checkRow][checkCol]===this.NONE){
+        return [];
     }
     var turnRows = [];
     var turnCols = [];
     turnRows.push(checkRow);
     turnCols.push(checkCol);
     checkRow += y;
-    checkCol += x;    
+    checkCol += x;
     while(!this.isOutOfRange(checkRow, checkCol)){
-        if(this.arrange[checkRow][checkCol]===color){
+        if(this.arrange[checkRow][checkCol]===this.NONE){
+            return [];
+        }else if(this.arrange[checkRow][checkCol]===color){
             for (var i=0; i<turnRows.length; i++){
-                this.putPiece(context, turnRows[i], turnCols[i], color);
+                turnPieceList.push({row:turnRows[i], col:turnCols[i]});
             }
-            return true;
+            return turnPieceList;
         }
         turnRows.push(checkRow);
         turnCols.push(checkCol);
         checkRow += y;
         checkCol += x;
     }
-    return false;
-};
+    return turnPieceList;
+}
 
 Game.prototype.canPutPieceOnBoard = function(color){
-    for(y=0; y<this.rows; y++){
-        for(x=0; x<this.cols; x++){
-            if(this.canPutPiece(y, x, color)){
-                return true;
-            }
+    canPutList = this.getCanPutList(color);
+    for(var i=0; i<canPutList.length; i++){
+        if(canPutList[i]===1){
+            return true;
         }
     }
     return false;
+}
+
+Game.prototype.getCanPutList = function(color){
+    var canPutList = [];
+    for(y=0; y<this.rows; y++){
+        for(x=0; x<this.cols; x++){
+            if(this.canPutPiece(y, x, color)){
+                canPutList.push(1);
+            }else{
+                canPutList.push(0);
+            }
+        }
+    }
+    return canPutList;
 }
