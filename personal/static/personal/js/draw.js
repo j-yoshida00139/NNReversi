@@ -9,45 +9,46 @@ GREEN_COLOR = "#080";
 CANVAS_ID = 'reversi_board';
 var eachHeight = 0;
 var eachWidth = 0;
-var nextColor = BLACK;
 var game = new Game(ROWS, COLS);
-
+CONTEXT_GLOBAL = null;
 
 onload = function () {
     var canvas = document.getElementById(CANVAS_ID);
+    var context = canvas.getContext('2d');
+    CONTEXT_GLOBAL = context;
     eachWidth = canvas.offsetWidth / COLS;
     eachHeight = canvas.offsetHeight / ROWS;
-    var context = canvas.getContext('2d');
 
     game.init(context);
     
     document.getElementById(CANVAS_ID).addEventListener("click", function (e) {
-        var mouseX = e.pageX;
-        var mouseY = e.pageY;
         var rect = canvas.getBoundingClientRect();
 
         var positionX = rect.left + window.pageXOffset;
         var positionY = rect.top + window.pageYOffset;
 
-        var offsetX = mouseX - positionX;
-        var offsetY = mouseY - positionY;
+        var offsetX = e.pageX - positionX;
+        var offsetY = e.pageY - positionY;
 
         var row = Math.floor(offsetY / eachHeight);
         var col = Math.floor(offsetX / eachWidth );
-        if(game.canPutPiece(row, col, nextColor)){
-            game.putPiece(context, row, col, nextColor);
-            game.turnPiece(context, row, col, nextColor);
-            nextColor = (nextColor===BLACK)? WHITE:BLACK;
+
+        if(game.canPutPiece(row, col, game.nextColor)){
+            game.putPiece(context, row, col, game.nextColor);
+            game.turnPiece(context, row, col, game.nextColor);
+            game.nextColor = (game.nextColor===BLACK)? WHITE:BLACK;
+            runAjax();
         }
-        if(!game.canPutPieceOnBoard(nextColor)){
-            nextColor = (nextColor===BLACK)? WHITE:BLACK;
-            if(!game.canPutPieceOnBoard(nextColor)){
+        if(!game.canPutPieceOnBoard(game.nextColor)){
+            game.nextColor = (game.nextColor===BLACK)? WHITE:BLACK;
+            if(!game.canPutPieceOnBoard(game.nextColor)){
                 window.alert("終わり!");
             }
         }
-        $('#turn').html(nextColor===BLACK? 'Black':'White')
+        $('#turn').html(game.nextColor===BLACK? 'Black':'White')
     });
 };
+
 function putPiece(context, row, col, color) {
     var x = (col + 0.5) * eachWidth;
     var y = (row + 0.5) * eachHeight;
@@ -76,11 +77,17 @@ function runAjax() {
         url: "/ajax/test/",
         dataType: "json",
         data: {
-            "color":nextColor,
+            "color":game.nextColor,
             "arrange": arrangeJson
         },
         success: function(data) {
-            alert(data);
+            setTimeout (function () {
+                row = data["row"];
+                col = data["col"];
+                game.putPiece(CONTEXT_GLOBAL, row, col, game.nextColor);
+                game.turnPiece(CONTEXT_GLOBAL, row, col, game.nextColor);
+                game.nextColor = (game.nextColor===BLACK)? WHITE:BLACK;
+            }, 1000)
         }
     });
 }

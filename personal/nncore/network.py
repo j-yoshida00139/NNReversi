@@ -70,10 +70,10 @@ class Network(object):
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, eta)
             if test_data:
-                print "Epoch:{0}, total error:{1}".format(
-                    j, self.evaluate(test_data))
+                print ("Epoch:{0}, total error:{1}".format(
+                    j, self.evaluate(test_data)))
             else:
-                print "Epoch {0} complete".format(j)
+                print ("Epoch {0} complete".format(j))
 
         lr_loader.store_result(self.sizes, self.weights, self.biases)
         self.store_output(test_data)

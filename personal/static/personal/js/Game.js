@@ -1,3 +1,6 @@
+BLACK = 1;
+WHITE = 2;
+NONE  = 0;
 var directions = [
     {row: 0, col: 1},
     {row:-1, col: 1},
@@ -8,6 +11,7 @@ var directions = [
     {row: 1, col: 0},
     {row: 1, col: 1}
 ]
+var nextColor = BLACK;
 function Game(rows, cols){
     this.rows = rows;
     this.cols = cols;
