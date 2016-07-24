@@ -2,7 +2,8 @@ import os.path
 import numpy as np
 import csv
 
-def load_data():
+
+def load_data(sizesArg):
     fileName = 'sizes.csv'
     sizes = []
     if (os.path.exists(fileName)):
@@ -13,6 +14,8 @@ def load_data():
             for n in range(0,n_size):
                 sizes[n] = int(sizes[n])
         file.close()
+    else:
+        sizes = sizesArg
 
     fileName = 'weights.csv'
     weights = []
@@ -27,6 +30,9 @@ def load_data():
                 lines.append(np.array(line))
             weights.append(np.array(lines))
         file.close()
+    else:
+        weights = [np.random.randn(y, x)
+            for x, y in zip(sizes[:-1], sizes[1:])]
 
     biases = []
     fileName = 'biases.csv'
@@ -41,7 +47,9 @@ def load_data():
                 lines.append(np.array(line))
             biases.append(np.array(lines))
         file.close()
-        
+    else:
+        biases = [np.random.randn(y, 1) for y in sizes[1:]]
+
     return (sizes, weights, biases)
     
 def store_result(sizes, weights, biases):

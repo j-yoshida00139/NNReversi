@@ -15,6 +15,8 @@ function Game(rows, cols){
     this.BLACK = 1;
     this.WHITE = 2;
     this.nextColor = this.BLACK;
+    this.blackMove = [];
+    this.whiteMove = [];
 }
 
 Game.prototype.init = function(){
@@ -37,7 +39,7 @@ Game.prototype.clearPiece = function(row, col){
     this.arrange[row][col] = this.NONE;
 }
 
-Game.prototype.putPiece = function(row, col, color){
+Game.prototype.putPiece = function(row, col, color){    
     this.arrange[row][col] = color;
 }
 
@@ -51,6 +53,14 @@ Game.prototype.canPutPiece = function(row, col, color){
     return false;    
 }
 
+Game.prototype.storeMove = function(row, col, color){
+    if(color===this.BLACK){
+        this.blackMove.push({arrange:this.arrange, row:row, col:col, color:color});
+    }else{
+        this.whiteMove.push({arrange:this.arrange, row:row, col:col, color:color});
+    }
+}
+
 Game.prototype.isOutOfRange = function(row, col){
     if(row>=this.rows || col>=this.cols || row<0 || col<0){
         return true;
@@ -58,6 +68,18 @@ Game.prototype.isOutOfRange = function(row, col){
         return false;
     }
 };
+
+Game.prototype.getScore = function(color){
+    var counter = 0;
+    for(var row=0; row<this.rows; row++){
+        for(var col=0; col<this.cols; col++){
+            if(this.arrange[row][col]===color){
+                counter++;
+            }
+        }
+    }
+    return counter;
+}
 
 Game.prototype.getTurnPieceList = function(row, col, color){
     var turnPieceList = [];
@@ -127,4 +149,13 @@ Game.prototype.getCanPutList = function(color){
         }
     }
     return canPutList;
+}
+
+Game.prototype.getWinnersData = function(){
+    if( this.getScore(this.BLACK) > this.getScore(this.WHITE) ){
+        return this.blackMove;
+    }else{
+        return this.whiteMove;
+    }
+
 }

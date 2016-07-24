@@ -5,5 +5,6 @@ from . import ajax
 urlpatterns = [
     url(r'^$', views.index, name='index'),
     url(r'^contact/', views.contact, name='contact'),
-    url(r'^ajax/test/', ajax.test, name='ajax'),
+    url(r'^ajax/nextMove/', ajax.nextMove, name='nextMove'),
+    url(r'^ajax/storeWinnersData/', ajax.storeWinnersData, name='storeWinnersData'),
 ]

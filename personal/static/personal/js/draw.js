@@ -27,11 +27,6 @@ onload = function () {
     putPiece(context, upRow+1, leftCol  , game.WHITE);
     putPiece(context, upRow  , leftCol+1, game.WHITE);
     putPiece(context, upRow+1, leftCol+1, game.BLACK);
-    game.putPiece(upRow  , leftCol  , game.BLACK);
-    game.putPiece(upRow+1, leftCol  , game.WHITE);
-    game.putPiece(upRow  , leftCol+1, game.WHITE);
-    game.putPiece(upRow+1, leftCol+1, game.BLACK);
-
     
     document.getElementById(CANVAS_ID).addEventListener("click", function (e) {
         var rect = canvas.getBoundingClientRect();
@@ -46,13 +41,14 @@ onload = function () {
         var col = Math.floor(offsetX / eachWidth );
 
         if(game.canPutPiece(row, col, game.nextColor)){
+            game.storeMove(row, col, game.nextColor);
             putPiece(context, row, col, game.nextColor);
-            game.putPiece(row, col, game.nextColor);
             turnPieceList = game.getTurnPieceList(row, col, game.nextColor);
             turnPiece(context, turnPieceList, game.nextColor);
+            $('#countBlack').html(game.getScore(game.BLACK));
+            $('#countWhite').html(game.getScore(game.WHITE));
             goNextTurn(context);
             counter++;
-            $('#counter').html(counter);
         }
         $('#turn').html(game.nextColor===game.BLACK? 'Black':'White')
     });
@@ -60,32 +56,40 @@ onload = function () {
 
 function goNextTurn(context){
     game.nextColor = (game.nextColor===game.BLACK)? game.WHITE:game.BLACK;
-    if(game.canPutPieceOnBoard(game.nextColor)){        
+    if(game.canPutPieceOnBoard(game.nextColor)){
         if(game.nextColor===game.WHITE){
-            runAjax(context);
+            moveByNN(context);
         }
-    }else{
-        game.nextColor = (game.nextColor===game.BLACK)? game.WHITE:game.BLACK;
-        if(game.canPutPieceOnBoard(game.nextColor)){
-            var colorStr = game.nextColor===game.BLACK? "黒":"白";
-            window.alert("次のプレイヤーが置ける場所がないので、次も" + colorStr + "の番です");
-            if(game.nextColor===game.WHITE){
-                runAjax(context);
-            }
-        }else{
-            window.alert("終わり!");            
-        }
+        return;
     }
+    // Case that the next user could not put any pieces
+    game.nextColor = (game.nextColor===game.BLACK)? game.WHITE:game.BLACK;
+    if(game.canPutPieceOnBoard(game.nextColor)){
+        var colorStr = game.nextColor===game.BLACK? "黒":"白";
+        window.alert("次のプレイヤーが置ける場所がないので、次も" + colorStr + "の番です");
+        if(game.nextColor===game.WHITE){
+            moveByNN(context);
+        }
+        return;
+    }
+    // Case that both users could not put any pieces
+    window.alert("終わり!");
+    var winnersData = game.getWinnersData();
+    sendWinnersData(winnersData);
 }
 
 function turnPiece(context, turnPieceList, color){
     for(var i=0; i<turnPieceList.length; i++){
         putPiece(context, turnPieceList[i]["row"], turnPieceList[i]["col"], color);
-        game.putPiece(turnPieceList[i]["row"], turnPieceList[i]["col"], color);
     }
 }
 
 function putPiece(context, row, col, color) {
+    drawPiece(context, row, col, color);
+    game.putPiece(row, col, color);
+}
+
+function drawPiece(context, row, col, color){
     var x = (col + 0.5) * eachWidth;
     var y = (row + 0.5) * eachHeight;
     var radius = Math.min(eachWidth, eachHeight) * 0.8 / 2;
@@ -93,7 +97,7 @@ function putPiece(context, row, col, color) {
     context.fillStyle = (color===game.BLACK)? BLACK_COLOR : WHITE_COLOR;
     context.lineWidth = 1;
     context.arc(x, y, radius, 0, Math.PI * 2, false);
-    context.fill();
+    context.fill();    
 }
 
 function clearPiece(context, row, col) {
@@ -106,12 +110,12 @@ function clearPiece(context, row, col) {
     context.strokeRect(xUpLeft, yUpLeft, eachWidth, eachHeight);
 }
 
-function runAjax(context) {
+function moveByNN(context) {
     var arrangeJson = JSON.stringify(game.arrange);
     var canPutListJson = JSON.stringify(game.getCanPutList(game.nextColor));
     $.ajax({
         type: "POST",
-        url: "/ajax/test/",
+        url: "/ajax/nextMove/",
         dataType: "json",
         data: {
             "color"     : game.nextColor,
@@ -122,16 +126,43 @@ function runAjax(context) {
             setTimeout (function () {
                 row = data["row"];
                 col = data["col"];
+                game.storeMove(row, col, game.nextColor);
                 putPiece(context, row, col, game.nextColor);
-                game.putPiece(row, col, game.nextColor);
                 turnPieceList = game.getTurnPieceList(row, col, game.nextColor);
                 turnPiece(context, turnPieceList, game.nextColor);
+                $('#countBlack').html(game.getScore(game.BLACK));
+                $('#countWhite').html(game.getScore(game.WHITE));
                 goNextTurn(context);
                 counter++;
                 $('#counter').html(counter);
-//                game.nextColor = (game.nextColor===game.BLACK)? game.WHITE:game.BLACK;
             }, 1000);
         }
     });
 }
 
+function sendWinnersData(winnersData) {
+    var winnersDataJson = JSON.stringify(winnersData);
+    $.ajax({
+        type: "POST",
+        url: "/ajax/storeWinnersData/",
+        dataType: "json",
+        data: {
+            "winnersData"     : winnersDataJson
+        },
+        success: function(data) {
+            // setTimeout (function () {
+            //     row = data["row"];
+            //     col = data["col"];
+            //     game.storeMove(row, col, game.nextColor);
+            //     putPiece(context, row, col, game.nextColor);
+            //     turnPieceList = game.getTurnPieceList(row, col, game.nextColor);
+            //     turnPiece(context, turnPieceList, game.nextColor);
+            //     $('#countBlack').html(game.getScore(game.BLACK));
+            //     $('#countWhite').html(game.getScore(game.WHITE));
+            //     goNextTurn(context);
+            //     counter++;
+            //     $('#counter').html(counter);
+            // }, 1000);
+        }
+    });
+}
