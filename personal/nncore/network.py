@@ -76,7 +76,7 @@ class Network(object):
                 print ("Epoch {0} complete".format(j))
 
         lr_loader.store_result(self.sizes, self.weights, self.biases)
-        self.store_output(test_data)
+        #self.store_output(test_data)
 
     def update_mini_batch(self, mini_batch, eta):
         """Update the network's weights and biases by applying
@@ -144,32 +144,32 @@ class Network(object):
         \partial a for the output activations."""
         return (output_activations-y)
     
-    def store_output(self, test_data):
-        inputs = [x for (x,y) in test_data]
-        outputs = [(self.feedforward(x), y)
-                        for (x, y) in test_data]
-        for i in range(len(inputs)):
-            input_ave = sum(inputs[i]) / float(len(inputs[i]))
-            fileName = "output/{0:08d}".format(i+1)
-            f = open(fileName + '.csv', 'w')
-            dataWriter = csv.writer(f)
-            x = 0
-            for j in range(0, len(inputs[i])):
-                outStr = []
-                outStr.append(x)
-                outStr.append(inputs[i][j][0])
-                outStr.append(inputs[i][j][0])
-                dataWriter.writerow(outStr)
-                x+=1
-            x+=15
-            for j in range(0, len(outputs[0][0])):
-                outStr = []
-                outStr.append(x)
-                outStr.append(outputs[i][0][j][0] * input_ave[0] * 2.0)
-                outStr.append(outputs[i][1][j][0] * input_ave[0] * 2.0)
-                dataWriter.writerow(outStr)
-                x+=30
-            f.close()
+    # def store_output(self, test_data):
+    #     inputs = [x for (x,y) in test_data]
+    #     outputs = [(self.feedforward(x), y)
+    #                     for (x, y) in test_data]
+    #     for i in range(len(inputs)):
+    #         input_ave = sum(inputs[i]) / float(len(inputs[i]))
+    #         fileName = "output/{0:08d}".format(i+1)
+    #         f = open(fileName + '.csv', 'w')
+    #         dataWriter = csv.writer(f)
+    #         x = 0
+    #         for j in range(0, len(inputs[i])):
+    #             outStr = []
+    #             outStr.append(x)
+    #             outStr.append(inputs[i][j][0])
+    #             outStr.append(inputs[i][j][0])
+    #             dataWriter.writerow(outStr)
+    #             x+=1
+    #         x+=15
+    #         for j in range(0, len(outputs[0][0])):
+    #             outStr = []
+    #             outStr.append(x)
+    #             outStr.append(outputs[i][0][j][0] * input_ave[0] * 2.0)
+    #             outStr.append(outputs[i][1][j][0] * input_ave[0] * 2.0)
+    #             dataWriter.writerow(outStr)
+    #             x+=30
+    #         f.close()
 
 
 

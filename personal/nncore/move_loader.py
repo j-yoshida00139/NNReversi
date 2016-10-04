@@ -1,8 +1,7 @@
 """
-stock_loader
+move_loader
 ~~~~~~~~~~~~
-A library to load the stock price data.
-The data is from ruby jpstock script.
+A library to load the move data of reversi.
 """
 
 #### Libraries
@@ -19,8 +18,8 @@ def load_data():
     """
     training_data : number of elements is same as the number of sample
                     each element has 2 child elements
-                    1st one is the stock prices for each day
-                    2nd one is the stock prices of next year
+                    1st one is the arrangement of the pieces
+                    2nd one is the next move for the arrangement
     validation_data, test_data : same structure as training_data
     """
     n_total = 100
