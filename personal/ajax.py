@@ -15,6 +15,7 @@ NONE = 0
 ROWS = 8
 COLS = 8
 
+
 def nextMove(request):
 	if request.is_ajax() and request.method == 'POST':
 		arrange = request.POST.get('arrange')

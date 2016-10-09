@@ -10,6 +10,7 @@ var game = new Game(ROWS, COLS);
 var counter = 4;
 
 onload = function () {
+
     var canvas = document.getElementById(CANVAS_ID);
     var context = canvas.getContext('2d');
     eachWidth = canvas.offsetWidth / COLS;
@@ -166,3 +167,4 @@ function sendWinnersData(winnersData) {
         }
     });
 }
+

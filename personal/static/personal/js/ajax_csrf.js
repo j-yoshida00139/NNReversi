@@ -1,3 +1,4 @@
+// put 'X-CSRFToken' header for all ajax
 jQuery(document).ajaxSend(function(event, xhr, settings) {
     function getCookie(name) {
         var cookieValue = null;
