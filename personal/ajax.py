@@ -83,8 +83,6 @@ def storeWinnersData(request):
 			dataWriterOut.writerow(moveList)
 			fOut.close()
 
-
-
 		return HttpResponse(winnersDataArray, content_type='application/json')
 	else:
 		raise Http404

@@ -14,12 +14,13 @@ class NNHandler(object):
 		self.n_neutral_neuron = 100
 		self.n_output = 64 #12
 		self.size = [self.n_input, self.n_neutral_neuron, self.n_output]
-
+		print("loaded")
 
 	def learn(self):
 		n_epoch = 100
-		n_batch_size = 10
+		n_batch_size = 200
 		coe_learn = 0.1
+		print("started")
 
 		for x in range(10):
 			print("cycle number : {0:03d}".format(x+1))
@@ -39,3 +40,4 @@ class NNHandler(object):
 		#net.SGD(training_data, 30, 10, 0.5, lmbda = 5.0, evaluation_data=validation_data, monitor_evaluation_accuracy=True, monitor_evaluation_cost=True, monitor_training_accuracy=True, monitor_training_cost=True)
 
 		#net.save('properties.txt')
+

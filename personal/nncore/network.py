@@ -70,8 +70,8 @@ class Network(object):
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, eta)
             if test_data:
-                print ("Epoch:{0}, total error:{1}".format(
-                    j, self.evaluate(test_data)))
+                print ("Epoch:{0}, training error:{1}, test error:{2}".format(
+                    j, self.evaluate(training_data), self.evaluate(test_data)))
             else:
                 print ("Epoch {0} complete".format(j))
 

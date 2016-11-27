@@ -22,10 +22,10 @@ def load_data():
                     2nd one is the next move for the arrangement
     validation_data, test_data : same structure as training_data
     """
-    n_total = 100
-    n_training = 60
-    n_validation = 10
-    n_test = 10
+    n_total = 200
+    n_training = 120
+    n_validation = 20
+    n_test = 20
     training_data, validation_data, test_data = get_random_data(n_training, n_validation, n_test, n_total)
     return (training_data, validation_data, test_data)
 
@@ -64,4 +64,3 @@ def load_from_file(fileName):
             outArray.append(float(value))
 
     return outArray
-
