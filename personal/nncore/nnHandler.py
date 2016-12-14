@@ -5,10 +5,16 @@ Handler method to learn based on Neural Network learning process
 """
 import move_loader
 import network
+import sys, os, math
+import os.path
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir))
+#sys.path.append(os.path.dirname(os.path.abspath(__file__).pardir))
+
+
 #import network2
 
 class NNHandler(object):
-
+	print(os.path.join(os.path.dirname(__file__), os.pardir))
 	def __init__(self):
 		self.n_input = 192 #366
 		self.n_neutral_neuron = 100
@@ -17,14 +23,20 @@ class NNHandler(object):
 		print("loaded")
 
 	def learn(self):
+		import game
+		game = game.Game(8, 8)
+		maxFileNo = game.getLastFileNo()
+
 		n_epoch = 100
-		n_batch_size = 200
+		n_batch_size = math.floor(maxFileNo/200)*100
+		print("batch size is :")
+		print(n_batch_size)
 		coe_learn = 0.1
 		print("started")
 
-		for x in range(10):
+		for x in range(100):
 			print("cycle number : {0:03d}".format(x+1))
-			training_data, validation_data, test_data = move_loader.load_data()
+			training_data, validation_data, test_data = move_loader.load_data(n_batch_size)
 			print("training_data : ")
 			print(len(training_data))
 			print("validation_data : ")

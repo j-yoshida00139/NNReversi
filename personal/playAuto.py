@@ -17,12 +17,6 @@ game.initialize()
 while game.canPutPieceOnBoard(game.WHITE) or game.canPutPieceOnBoard(game.BLACK):
     arrangeList = game.returnNnInputList(game.arrange, game.nextColor)
     move = net.feedforward(arrangeList) #move[0][0:63]
-#    print(move)
-#    print("result")
-#    print(type(result))
-#    rand = np.random.random(64)
-#    print("rand")
-#    print(type(rand))
     index = np.argmax(move[0]*game.getCanPutList(game.nextColor))
     row, col = divmod(index, 8)
 

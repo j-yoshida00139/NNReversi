@@ -11,10 +11,11 @@ import gzip
 import zipfile
 import random
 import csv
+import math
 # Third-party libraries
 import numpy as np
 
-def load_data():
+def load_data(batch_size):
     """
     training_data : number of elements is same as the number of sample
                     each element has 2 child elements
@@ -22,10 +23,11 @@ def load_data():
                     2nd one is the next move for the arrangement
     validation_data, test_data : same structure as training_data
     """
-    n_total = 200
-    n_training = 120
-    n_validation = 20
-    n_test = 20
+
+    n_total = batch_size
+    n_training = math.floor(batch_size*0.5)
+    n_validation = math.floor(batch_size*0.1)
+    n_test = math.floor(batch_size*0.1)
     training_data, validation_data, test_data = get_random_data(n_training, n_validation, n_test, n_total)
     return (training_data, validation_data, test_data)
 
@@ -45,6 +47,7 @@ def get_random_data(n_training, n_validation, n_test, n_total):
 def get_data_by_list(n_list):
     inputs  = []
     results = []
+    print(len(n_list))
     for i in n_list:
         file_no     = "{0:08d}".format(i+1)
         input_data  = load_from_file('winnersData/input_'+file_no+'.csv')
