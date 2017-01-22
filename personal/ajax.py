@@ -1,13 +1,13 @@
 import sys, os
-from os import listdir
-from os.path import isfile, join
+#from os import listdir
+#from os.path import isfile, join
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/nncore')
 import json
 from django.http import Http404, HttpResponse
 import network
 import csv
-import numpy as np
+#import numpy as np
 import game
 
 n_input = 192 #366

@@ -21,6 +21,7 @@ import csv
 # Third-party libraries
 import numpy as np
 
+import last_result_loader as lr_loader
 
 #### Define the quadratic and cross-entropy cost functions
 
@@ -82,6 +83,9 @@ class Network(object):
         self.num_layers = len(sizes)
         self.sizes = sizes
         self.default_weight_initializer()
+
+        self.sizes, self.weights, self.biases = lr_loader.load_data(sizes)
+
         self.cost=cost
 
     def default_weight_initializer(self):
@@ -157,37 +161,37 @@ class Network(object):
         n = len(training_data)
         evaluation_cost, evaluation_accuracy = [], []
         training_cost, training_accuracy = [], []
-        for j in xrange(epochs):
+        #for j in xrange(epochs):
+        for j in range(epochs):
             random.shuffle(training_data)
             mini_batches = [
                 training_data[k:k+mini_batch_size]
-                for k in xrange(0, n, mini_batch_size)]
+                for k in range(0, n, mini_batch_size)]
             for mini_batch in mini_batches:
                 self.update_mini_batch(
                     mini_batch, eta, lmbda, len(training_data))
-            print "Epoch %s training complete" % j
+            print("Epoch %s training complete" % j)
             if monitor_training_cost:
                 cost = self.total_cost(training_data, lmbda)
                 training_cost.append(cost)
-                print "Cost on training data      : {}".format(cost)
+                print("Cost on training data      : {}".format(cost))
             if monitor_evaluation_cost:
                 #cost = self.total_cost(evaluation_data, lmbda, convert=True)
                 cost = self.total_cost(evaluation_data, lmbda)
                 evaluation_cost.append(cost)
-                print "Cost on evaluation data    : {}".format(cost)
+                print("Cost on evaluation data    : {}".format(cost))
             if monitor_training_accuracy:
                 #accuracy = self.accuracy(training_data, convert=True)
                 accuracy = self.accuracy(training_data)
                 training_accuracy.append(accuracy)
-                print "Accuracy on training data  : {}".format(
-                    accuracy)
+                print("Accuracy on training data  : {}".format(
+                    accuracy))
             if monitor_evaluation_accuracy:
                 accuracy = self.accuracy(evaluation_data)
                 evaluation_accuracy.append(accuracy)
-                print "Accuracy on evaluation data: {}".format(
-                    self.accuracy(evaluation_data))
-            print
-        self.store_output(evaluation_data)
+                print("Accuracy on evaluation data: {}".format(
+                    self.accuracy(evaluation_data)))
+        lr_loader.store_result(self.sizes, self.weights, self.biases)
         #self.save("properties.txt")
         #return evaluation_cost, evaluation_accuracy, \
         #    training_cost, training_accuracy
@@ -237,7 +241,7 @@ class Network(object):
         # second-last layer, and so on.  It's a renumbering of the
         # scheme in the book, used here to take advantage of the fact
         # that Python can use negative indices in lists.
-        for l in xrange(2, self.num_layers):
+        for l in range(2, self.num_layers):
             z = zs[-l]
             sp = sigmoid_prime(z)
             delta = np.dot(self.weights[-l+1].transpose(), delta) * sp
@@ -311,33 +315,6 @@ class Network(object):
         f = open(filename, "w")
         json.dump(data, f)
         f.close()
-
-    def store_output(self, test_data):
-        inputs = [x for (x,y) in test_data]
-        outputs = [(self.feedforward(x), y)
-                        for (x, y) in test_data]
-        for i in range(len(inputs)):
-            input_ave = sum(inputs[i]) / float(len(inputs[i]))
-            fileName = "output/{0:08d}".format(i+1)
-            f = open(fileName + '.csv', 'w')
-            dataWriter = csv.writer(f)
-            x = 0
-            for j in range(0, len(inputs[i])):
-                outStr = []
-                outStr.append(x)
-                outStr.append(inputs[i][j][0])
-                outStr.append(inputs[i][j][0])
-                dataWriter.writerow(outStr)
-                x+=1
-            x+=15
-            for j in range(0, len(outputs[0][0])):
-                outStr = []
-                outStr.append(x)
-                outStr.append(outputs[i][0][j][0] * input_ave[0] * 2.0)
-                outStr.append(outputs[i][1][j][0] * input_ave[0] * 2.0)
-                dataWriter.writerow(outStr)
-                x+=30
-            f.close()
 
 #### Loading a Network
 def load(filename):

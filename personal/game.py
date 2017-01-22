@@ -17,18 +17,26 @@ directions = [
 	{"row": 1, "col": 1}
 ]
 
+
 class Game(object):
-	def __init__(self,rows, cols):
+	def __init__(self, rows, cols, arrangeList=(), nextColor=0):
 		self.rows = rows
 		self.cols = cols
 		self.NONE  = 0
 		self.BLACK = 1
 		self.WHITE = 2
+		self.arrange = []
 		self.nextColor = self.BLACK
-		self.blackMove = []
-		self.whiteMove = []
+		if arrangeList:
+			tmpList = list(arrangeList)
+			self.arrange = self.unshared_copy(arrangeList)
+		if nextColor:
+			self.nextColor = nextColor
 
 	def initialize(self):
+		self.blackMove = []
+		self.whiteMove = []
+		self.nextColor = self.BLACK
 		upRow   = math.floor((self.rows-1)/2)
 		leftCol = math.floor((self.cols-1)/2)
 		self.arrange = [[0 for col in range(0, self.cols)] for row in range(0, self.rows)]
@@ -52,10 +60,11 @@ class Game(object):
 		return False
 
 	def storeMove(self, row, col, color):
+		arrangeTpl = Game.list_to_tuple(self.arrange)
 		if color==self.BLACK :
-			self.blackMove.append({"arrange":self.arrange, "color":color, "row":row, "col":col})
+			self.blackMove.append({"arrange":arrangeTpl, "color":color, "row":row, "col":col})
 		else:
-			self.whiteMove.append({"arrange":self.arrange, "color":color, "row":row, "col":col})
+			self.whiteMove.append({"arrange":arrangeTpl, "color":color, "row":row, "col":col})
 
 	def isOutOfRange(self, row, col):
 		if row>=self.rows or col>=self.cols or row<0 or col<0:
@@ -201,6 +210,11 @@ class Game(object):
 		return np.max(fileNoList)
 
 	def returnMoveList(self, row, col):
+		u"""Return array which has next move's row and column. (for neural network)
+		:param row: row of next move
+		:param col: column of next move
+		:return: converted array for neural network
+		"""
 		moveList = []
 		for y in range(0, self.rows):
 			for x in range(0, self.cols):
@@ -219,7 +233,6 @@ class Game(object):
 
 	@staticmethod
 	def retrieveFileNo(filename):
-		print(filename)
 		if filename.count(".csv"):
 			tmpFileName = filename.replace("input_", "")
 			tmpFileName = tmpFileName.replace("output_", "")
@@ -227,3 +240,41 @@ class Game(object):
 			return int(tmpFileName)
 		else:
 			return 0
+
+	@staticmethod
+	def list_to_tuple(_list):
+		tpl = ()
+		for elm in _list:
+			if isinstance(elm,list):
+				tpl += (Game.list_to_tuple(elm),)
+			else:
+				tpl += (elm,)
+		return tpl
+
+	@staticmethod
+	def unshared_copy(inList):
+		if isinstance(inList, list):
+			return list(map(Game.unshared_copy, inList))
+		return inList
+
+	def setArrange(self, arrangeList):
+		self.arrange = arrangeList
+		return True
+
+	def setNextColor(self, nextColor):
+		self.nextColor = nextColor
+		return True
+
+	def isEnded(self):
+		if self.canPutPieceOnBoard(self.WHITE) or self.canPutPieceOnBoard(self.BLACK):
+			return False
+		else:
+			return True
+
+	def getWinnersColor(self):
+		if self.getScore(self.BLACK) > self.getScore(self.WHITE):
+			return self.BLACK
+		elif self.getScore(self.BLACK) < self.getScore(self.WHITE):
+			return self.WHITE
+		else:
+			return self.NONE

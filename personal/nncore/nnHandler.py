@@ -11,7 +11,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir))
 #sys.path.append(os.path.dirname(os.path.abspath(__file__).pardir))
 
 
-#import network2
+import network2
 
 class NNHandler(object):
 	print(os.path.join(os.path.dirname(__file__), os.pardir))
@@ -34,7 +34,7 @@ class NNHandler(object):
 		coe_learn = 0.1
 		print("started")
 
-		for x in range(100):
+		for x in range(10):
 			print("cycle number : {0:03d}".format(x+1))
 			training_data, validation_data, test_data = move_loader.load_data(n_batch_size)
 			print("training_data : ")
@@ -44,12 +44,12 @@ class NNHandler(object):
 			print("test_data : ")
 			print(len(test_data))
 			"""network.py"""
-			net = network.Network(self.size)
-			net.SGD(training_data, n_epoch, n_batch_size, coe_learn, test_data=test_data)
+			#net = network.Network(self.size)
+			#net.SGD(training_data, n_epoch, n_batch_size, coe_learn, test_data=test_data)
 			"""network2.py"""
-		#net = network2.load('properties.txt')
-		#net = network2.Network(size, cost=network2.CrossEntropyCost())
-		#net.SGD(training_data, 30, 10, 0.5, lmbda = 5.0, evaluation_data=validation_data, monitor_evaluation_accuracy=True, monitor_evaluation_cost=True, monitor_training_accuracy=True, monitor_training_cost=True)
+			#net = network2.load('properties.txt')
+			net = network2.Network(self.size, cost=network2.CrossEntropyCost())
+			net.SGD(training_data, n_epoch, n_batch_size, 10.0, lmbda = 1.0, evaluation_data=validation_data, monitor_evaluation_accuracy=True, monitor_evaluation_cost=True, monitor_training_accuracy=True, monitor_training_cost=True)
 
-		#net.save('properties.txt')
+			#net.save('properties.txt')
 

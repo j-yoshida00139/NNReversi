@@ -61,17 +61,17 @@ def store_result(sizes, weights, biases):
     f = open('weights.csv', 'w')
     dataWriter = csv.writer(f)
     for n in range(0, n_weights):
-    	for m in range(0, sizes[n+1]):
-    		outStr = []
-    		for l in range(0, sizes[n]):
-    			outStr.append(weights[n][m][l])
-    		dataWriter.writerow(outStr)
+        for m in range(0, sizes[n+1]):
+            outStr = []
+            for l in range(0, sizes[n]):
+                outStr.append(weights[n][m][l])
+            dataWriter.writerow(outStr)
     f.close()
     f = open('biases.csv', 'w')
     dataWriter = csv.writer(f)
     for n in range(0, n_weights):
-    	for m in range(0, sizes[n+1]):
-    		outStr = []
-    		outStr.append(biases[n][m][0])
-    		dataWriter.writerow(outStr)
+        for m in range(0, sizes[n+1]):
+            outStr = []
+            outStr.append(biases[n][m][0])
+            dataWriter.writerow(outStr)
     f.close()
