@@ -4,7 +4,16 @@ import csv
 from os import listdir
 from os.path import isfile, join
 import numpy as np
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/nncore')
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/utils')
+import network2
+import basicFunc
+import storeBestMove
 
+n_input = 192 #366
+n_neutral_neuron = 100
+n_output = 64 #12
+size = [n_input, n_neutral_neuron, n_output]
 
 directions = [
 	{"row": 0, "col": 1},
@@ -19,28 +28,21 @@ directions = [
 
 
 class Game(object):
-	def __init__(self, rows, cols, arrangeList=(), nextColor=0):
+	def __init__(self, rows, cols, arrangeList=[], nextColor=0):
 		self.rows = rows
 		self.cols = cols
 		self.NONE  = 0
 		self.BLACK = 1
 		self.WHITE = 2
-		self.arrange = []
-		self.nextColor = self.BLACK
-		if arrangeList:
-			tmpList = list(arrangeList)
-			self.arrange = self.unshared_copy(arrangeList)
-		if nextColor:
-			self.nextColor = nextColor
-
-	def initialize(self):
+		self.arrange = arrangeList
 		self.blackMove = []
 		self.whiteMove = []
-		self.nextColor = self.BLACK
+		self.nextColor = self.BLACK if nextColor == 0 else nextColor
+
+	def initialize(self):
 		upRow   = math.floor((self.rows-1)/2)
 		leftCol = math.floor((self.cols-1)/2)
 		self.arrange = [[0 for col in range(0, self.cols)] for row in range(0, self.rows)]
-
 		self.putPiece(upRow  , leftCol  , self.BLACK)
 		self.putPiece(upRow+1, leftCol  , self.WHITE)
 		self.putPiece(upRow  , leftCol+1, self.WHITE)
@@ -60,11 +62,11 @@ class Game(object):
 		return False
 
 	def storeMove(self, row, col, color):
-		arrangeTpl = Game.list_to_tuple(self.arrange)
+		tmpArrangeList = basicFunc.unsharedCopy(self.arrange)
 		if color==self.BLACK :
-			self.blackMove.append({"arrange":arrangeTpl, "color":color, "row":row, "col":col})
+			self.blackMove.append({"arrange":tmpArrangeList, "color":color, "row":row, "col":col})
 		else:
-			self.whiteMove.append({"arrange":arrangeTpl, "color":color, "row":row, "col":col})
+			self.whiteMove.append({"arrange":tmpArrangeList, "color":color, "row":row, "col":col})
 
 	def isOutOfRange(self, row, col):
 		if row>=self.rows or col>=self.cols or row<0 or col<0:
@@ -84,23 +86,19 @@ class Game(object):
 		turnPieceList = []
 		for i in range(0, len(directions)):
 			tmpTurnPieceList = self.getTurnPieceForDirect(row, col, color,  directions[i]['row'], directions[i]['col'])
-			if len(tmpTurnPieceList)>0:
-				for j in range(0, len(tmpTurnPieceList)):
-					turnPieceList.append({"row":tmpTurnPieceList[j]['row'], "col":tmpTurnPieceList[j]['col']})
+			for j in range(len(tmpTurnPieceList)):
+				turnPieceList.append({"row":tmpTurnPieceList[j]['row'], "col":tmpTurnPieceList[j]['col']})
 		return turnPieceList
 
 	def getTurnPieceForDirect(self, row, col, color, y, x):
-		turnPieceList = []
-		if self.isOutOfRange(row+y, col+x):
+		checkRow, checkCol = row+y, col+x
+		if self.isOutOfRange(checkRow, checkCol):
 			return []
 
-		checkRow = row+y
-		checkCol = col+x
 		if self.arrange[checkRow][checkCol]==color or self.arrange[checkRow][checkCol]==self.NONE:
 			return []
 
-		turnRows = []
-		turnCols = []
+		turnPieceList, turnRows, turnCols = [], [], []
 		turnRows.append(checkRow)
 		turnCols.append(checkCol)
 		checkRow += y
@@ -121,15 +119,15 @@ class Game(object):
 
 	def canPutPieceOnBoard(self, color):
 		canPutList = self.getCanPutList(color)
-		for i in range(0, len(canPutList)):
-			if canPutList[i]==1:
+		for canPut in canPutList:
+			if canPut==1:
 				return True
 		return False
 
 	def getCanPutList(self, color):
 		canPutList = []
-		for y in range(0, self.rows):
-			for x in range(0, self.cols):
+		for y in range(self.rows):
+			for x in range(self.cols):
 				if self.canPutPiece(y, x, color):
 					canPutList.append(1)
 				else:
@@ -192,7 +190,7 @@ class Game(object):
 
 			row = winnersMove["row"]
 			col = winnersMove["col"]
-			moveList = self.returnMoveList(row, col)
+			moveList = Game.returnMoveList(row, col)
 
 			dataWriterIn = csv.writer(fIn)
 			dataWriterIn.writerow(Game.returnNnInputStoreList(inputList))
@@ -202,12 +200,6 @@ class Game(object):
 			fOut.close()
 
 		return True
-
-	@staticmethod
-	def getLastFileNo():
-		path = os.path.dirname(os.path.abspath(__file__)) + "/nncore/winnersData/"
-		fileNoList = [Game.retrieveFileNo(f) for f in listdir(path) if isfile(join(path, f))]
-		return np.max(fileNoList)
 
 	def returnMoveList(self, row, col):
 		u"""Return array which has next move's row and column. (for neural network)
@@ -231,36 +223,6 @@ class Game(object):
 			arrangeList.append(value[0])
 		return arrangeList
 
-	@staticmethod
-	def retrieveFileNo(filename):
-		if filename.count(".csv"):
-			tmpFileName = filename.replace("input_", "")
-			tmpFileName = tmpFileName.replace("output_", "")
-			tmpFileName = tmpFileName.replace(".csv", "")
-			return int(tmpFileName)
-		else:
-			return 0
-
-	@staticmethod
-	def list_to_tuple(_list):
-		tpl = ()
-		for elm in _list:
-			if isinstance(elm,list):
-				tpl += (Game.list_to_tuple(elm),)
-			else:
-				tpl += (elm,)
-		return tpl
-
-	@staticmethod
-	def unshared_copy(inList):
-		if isinstance(inList, list):
-			return list(map(Game.unshared_copy, inList))
-		return inList
-
-	def setArrange(self, arrangeList):
-		self.arrange = arrangeList
-		return True
-
 	def setNextColor(self, nextColor):
 		self.nextColor = nextColor
 		return True
@@ -278,3 +240,34 @@ class Game(object):
 			return self.WHITE
 		else:
 			return self.NONE
+
+	def goNextWithAutoMove(self, nnFlag=False):
+		arrangeList = self.returnNnInputList(self.arrange, self.nextColor)
+		if nnFlag:
+			net = network2.Network(size)
+			move = net.feedforward(arrangeList) #move[0][0:63]
+		else:
+			move = np.random.rand(1,64) #move[0][0:63]
+		index = np.argmax(move[0]*self.getCanPutList(self.nextColor))
+		row, col = divmod(index, 8)
+		self.goNextWithManualMove(row, col)
+
+	def goNextWithManualMove(self, row, col):
+		self.storeMove(row, col, self.nextColor)
+		self.putPiece(row, col, self.nextColor)
+		turnPieceList = self.getTurnPieceList(row, col, self.nextColor)
+		self.turnPiece(turnPieceList, self.nextColor)
+		self.goNextTurn()
+
+	def findBestMove(self):
+		winRatio, bestRow, bestCol = 0.0, 0, 0
+		for index, value in list(enumerate(self.getCanPutList(self.nextColor))):
+			if value == 0:  # means the piece cannot be put
+				continue
+			tmpGame = Game(8, 8, basicFunc.unsharedCopy(self.arrange), self.nextColor)
+			row, col = divmod(index, 8)
+			tmpGame.goNextWithManualMove(row, col)
+			tmpWinRatio = storeBestMove.calcWinRatio(tmpGame.arrange, tmpGame.nextColor, self.nextColor)
+			if tmpWinRatio >= winRatio:
+				bestRow, bestCol, winRatio = row, col, tmpWinRatio
+		return bestRow, bestCol, winRatio

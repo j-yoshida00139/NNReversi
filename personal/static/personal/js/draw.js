@@ -76,7 +76,7 @@ function goNextTurn(context){
     // Case that both users could not put any pieces
     window.alert("終わり!");
     var winnersData = game.getWinnersData();
-    sendWinnersData(winnersData);
+    //sendWinnersData(winnersData);
 }
 
 function turnPiece(context, turnPieceList, color){

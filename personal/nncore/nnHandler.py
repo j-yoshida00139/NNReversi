@@ -8,6 +8,8 @@ import network
 import sys, os, math
 import os.path
 sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir))
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir) + '/utils')
+import basicFunc
 #sys.path.append(os.path.dirname(os.path.abspath(__file__).pardir))
 
 
@@ -23,15 +25,14 @@ class NNHandler(object):
 		print("loaded")
 
 	def learn(self):
-		import game
-		game = game.Game(8, 8)
-		maxFileNo = game.getLastFileNo()
+		maxFileNo = basicFunc.getLastFileNo()
 
 		n_epoch = 100
 		n_batch_size = math.floor(maxFileNo/200)*100
 		print("batch size is :")
 		print(n_batch_size)
-		coe_learn = 0.1
+		coe_learn = 1.0
+		lmbda = 0.5
 		print("started")
 
 		for x in range(10):
@@ -49,7 +50,7 @@ class NNHandler(object):
 			"""network2.py"""
 			#net = network2.load('properties.txt')
 			net = network2.Network(self.size, cost=network2.CrossEntropyCost())
-			net.SGD(training_data, n_epoch, n_batch_size, 10.0, lmbda = 1.0, evaluation_data=validation_data, monitor_evaluation_accuracy=True, monitor_evaluation_cost=True, monitor_training_accuracy=True, monitor_training_cost=True)
+			net.SGD(training_data, n_epoch, n_batch_size, coe_learn, lmbda, evaluation_data=validation_data, monitor_evaluation_accuracy=True, monitor_evaluation_cost=True, monitor_training_accuracy=True, monitor_training_cost=True)
 
 			#net.save('properties.txt')
 

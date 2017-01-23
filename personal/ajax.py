@@ -3,12 +3,14 @@ import sys, os
 #from os.path import isfile, join
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/nncore')
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/utils')
 import json
 from django.http import Http404, HttpResponse
 import network
 import csv
 #import numpy as np
 import game
+import basicFunc
 
 n_input = 192 #366
 n_neutral_neuron = 100
@@ -17,8 +19,7 @@ NONE = 0
 ROWS = 8
 COLS = 8
 
-game = game.Game(ROWS, COLS)
-
+mainGame = game.Game(ROWS, COLS)
 
 def nextMove(request):
 	if request.is_ajax() and request.method == 'POST':
@@ -29,7 +30,7 @@ def nextMove(request):
 		arrangeArray = json.loads(arrange)
 		canPutList = json.loads(canPut)
 
-		arrangeList = game.returnNnInputList(arrangeArray, colorInt)
+		arrangeList = mainGame.returnNnInputList(arrangeArray, colorInt)
 
 		size = [n_input, n_neutral_neuron, n_output]
 		net = network.Network(size)
@@ -45,6 +46,12 @@ def nextMove(request):
 
 		index = outputList.index(max(outputList))
 		row, col = divmod(index, 8)
+
+		#tmp
+		#tmpGame = game.Game(8, 8, basicFunc.unsharedCopy(arrangeArray), colorInt)
+		#row, col, winRatio = tmpGame.findBestMove()
+		#tmp
+
 		cellJson = json.dumps({"row": row,"col": col})
 
 		return HttpResponse(cellJson, content_type='application/json')
@@ -57,11 +64,11 @@ def storeWinnersData(request):
 		winnersData = request.POST.get('winnersData')
 		winnersDataArray = json.loads(winnersData)
 		print (winnersDataArray)
-		lastFileNo = game.getLastFileNo()
+		lastFileNo = basicFunc.getLastFileNo()
 
 		for i in range(len(winnersDataArray)):
 			winnersMove = winnersDataArray[i]
-			inputList = game.returnNnInputList(winnersMove["arrange"], winnersMove["color"])
+			inputList = mainGame.returnNnInputList(winnersMove["arrange"], winnersMove["color"])
 			fileNo = lastFileNo + i
 			fileNameInput  = os.path.dirname(os.path.abspath(__file__)) + "/nncore/winnersData/input_{0:08d}".format(fileNo+1)
 			fileNameOutput = os.path.dirname(os.path.abspath(__file__)) + "/nncore/winnersData/output_{0:08d}".format(fileNo+1)
@@ -70,10 +77,10 @@ def storeWinnersData(request):
 
 			row = winnersMove["row"]
 			col = winnersMove["col"]
-			moveList = game.returnMoveList(row, col)
+			moveList = mainGame.returnMoveList(row, col)
 
 			dataWriterIn = csv.writer(fIn)
-			dataWriterIn.writerow(game.returnNnInputStoreList(inputList))
+			dataWriterIn.writerow(mainGame.returnNnInputStoreList(inputList))
 			fIn.close()
 			dataWriterOut = csv.writer(fOut)
 			dataWriterOut.writerow(moveList)
