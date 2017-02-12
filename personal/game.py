@@ -38,6 +38,8 @@ class Game(object):
 		self.blackMove = []
 		self.whiteMove = []
 		self.nextColor = self.BLACK if nextColor == 0 else nextColor
+		self.net = network2.Network(size)
+
 
 	def initialize(self):
 		upRow   = math.floor((self.rows-1)/2)
@@ -242,10 +244,9 @@ class Game(object):
 			return self.NONE
 
 	def goNextWithAutoMove(self, nnFlag=False):
-		arrangeList = self.returnNnInputList(self.arrange, self.nextColor)
 		if nnFlag:
-			net = network2.Network(size)
-			move = net.feedforward(arrangeList) #move[0][0:63]
+			arrangeList = self.returnNnInputList(self.arrange, self.nextColor)
+			move = self.net.feedforward(arrangeList) #move[0][0:63]
 		else:
 			move = np.random.rand(1,64) #move[0][0:63]
 		index = np.argmax(move[0]*self.getCanPutList(self.nextColor))

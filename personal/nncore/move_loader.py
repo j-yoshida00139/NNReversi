@@ -50,8 +50,10 @@ def get_data_by_list(n_list):
     print(len(n_list))
     for i in n_list:
         file_no     = "{0:08d}".format(i+1)
-        input_data  = load_from_file('winnersData/input_'+file_no+'.csv')
-        result_data = load_from_file('winnersData/output_'+file_no+'.csv')
+        input_data  = load_from_file('nncore/winnersData/input_'+file_no+'.csv')
+        result_data = load_from_file('nncore/winnersData/output_'+file_no+'.csv')
+        #input_data  = load_from_file('winnersData/input_'+file_no+'.csv')
+        #result_data = load_from_file('winnersData/output_'+file_no+'.csv')
         inputs.append(input_data)
         results.append(result_data)
 
