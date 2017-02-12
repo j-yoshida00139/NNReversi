@@ -24,6 +24,9 @@ class BestMove(object):
 	def str_id(self):
 		return str(self.id)
 
+	def getArrangementVals(self):
+		return (self.first_half_arrangement, self.last_half_arrangement)
+
 	def save(self):
 		try:
 			conn = sqlite3.connect('../db.sqlite3')
@@ -35,11 +38,22 @@ class BestMove(object):
 		except sqlite3.IntegrityError:
 			print ("couldn't add the data due to the data integrity problem.")
 
-	def retreiveAll(self):
-		conn = sqlite3.connect('../db.sqlite3')
+	@staticmethod
+	def retrieveAll():
+		conn = sqlite3.connect('../../db.sqlite3')
+		bestMoveList = []
 		with conn:
 			cursor = conn.cursor()
 			cursor.execute("select id, first_half_arrangement, last_half_arrangement, move_index, created_at, updated_at from best_moves")
-			resultList = cursor.fetchall()
-			print(len(resultList))
-		return resultList
+			for result in cursor.fetchall():
+				bestMoveList.append(BestMove(*result))
+		return bestMoveList
+
+	@staticmethod
+	def getCount():
+		conn = sqlite3.connect('../../db.sqlite3')
+		with conn:
+			cursor = conn.cursor()
+			cursor.execute("select count(id) from best_moves")
+			count = cursor.fetchone()
+		return count

@@ -25,13 +25,15 @@ class NNHandler(object):
 		print("loaded")
 
 	def learn(self):
-		maxFileNo = basicFunc.getLastFileNo()
+		maxFileNo = 18000
+		#maxFileNo = basicFunc.getLastFileNo()
 
-		n_epoch = 100
-		n_batch_size = math.floor(maxFileNo/200)*100
+		n_epoch = 10
+		n_batch_size = math.floor(maxFileNo/200)*200
 		print("batch size is :")
 		print(n_batch_size)
-		coe_learn = 0.7
+		coe_learn = 0.1
+		#coe_learn = 0.7
 		lmbda = 0.0
 		#lmbda = 0.001
 		print("started")
@@ -50,7 +52,8 @@ class NNHandler(object):
 			#net.SGD(training_data, n_epoch, n_batch_size, coe_learn, test_data=test_data)
 			"""network2.py"""
 			#net = network2.load('properties.txt')
-			net = network2_edit.Network(self.size, cost=network2_edit.CrossEntropyCost())
+			net = network2_edit.Network(self.size, cost=network2_edit.QuadraticCost())
+			#net = network2_edit.Network(self.size, cost=network2_edit.CrossEntropyCost())
 			net.SGD(training_data, n_epoch, n_batch_size, coe_learn, lmbda, evaluation_data=validation_data, monitor_evaluation_accuracy=True, monitor_evaluation_cost=True, monitor_training_accuracy=True, monitor_training_cost=True)
 
 			#net.save('properties.txt')
