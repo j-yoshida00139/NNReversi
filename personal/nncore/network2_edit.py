@@ -44,16 +44,18 @@ class AffineLayer(object):
 		self.db = None
 
 	def forward(self, x):
-		self.original_x_shape = x.shape
-		x = x.reshape(x.shape[0], -1)
-		self.x = x
-
-		out = np.dot(self.w, self.x) + self.b
+		self.original_x_shape = np.array(x).shape
+		#x = x.reshape(x.shape[0], -1)
+		#self.x = x
+		self.x = np.array(x).reshape(len(x), len(x[0]))
+		#self.w = np.array(self.w).reshape(len(self.w), len(self.w[0]))
+		#self.b = np.array(self.b).reshape(1, len(self.b))
+		out = np.dot(self.x, self.w) + self.b
 		return out
 
 	def backward(self, dout):
-		dx = np.dot(self.w.T, dout)
-		self.dW = np.dot(dout, self.x.T)
+		dx = np.dot(dout, self.w.T)
+		self.dW = np.dot(self.x.T, dout)
 		self.db = np.sum(dout, axis=0)
 
 		dx = dx.reshape(*self.original_x_shape)
@@ -72,6 +74,32 @@ class SigmoidLayer(object):
 		dx = dout * (1.0 - self.out) * self.out
 		return dx
 
+class SoftmaxCrossEntropyLayer(object):
+	def __init__(self):
+		self.loss = None
+		self.y = None
+		self.t = None
+
+	def forward(self, x, t):
+		self.t = np.array(t)
+		self.y = softmax(x)
+		self.loss = crossEntropyLoss(self.y, self.t)
+		return self.loss
+
+	def backward(self, dout=1):
+		batch_size = self.t.shape[0]
+		if self.t.size == self.y.size:
+			self.t = self.t.reshape(len(self.t), len(self.t[0]))
+			self.y = self.y.reshape(len(self.y), len(self.y[0]))
+			#dx = (self.y - self.t) / batch_size
+			dx = (self.y - self.t)
+		else:
+			dx = self.y.copy()
+			dx[np.arange(batch_size), self.t] -= 1
+			#dx = dx / batch_size
+
+		return dx
+
 
 #### Main Network class
 class Network(object):
@@ -81,6 +109,10 @@ class Network(object):
 		self.sizes = sizes
 		self.default_weight_initializer()
 		self.sizes, self.weights, self.biases = lr_loader.load_data(sizes)
+		self.weights[0] = self.weights[0].T
+		self.weights[1] = self.weights[1].T
+		self.biases[0] = np.array(self.biases[0]).reshape(len(self.biases[0]))
+		self.biases[1] = np.array(self.biases[1]).reshape(len(self.biases[1]))
 		self.cost=cost
 
 		self.layers = OrderedDict()
@@ -88,6 +120,26 @@ class Network(object):
 		self.layers['Sigmoid1'] = SigmoidLayer()
 		self.layers['Affine2'] = AffineLayer(self.weights[1], self.biases[1])
 		self.layers['Sigmoid2'] = SigmoidLayer()
+		self.lastLayer = SoftmaxCrossEntropyLayer()
+
+	def loss(self, x, t):
+		y = self.feedforward(x)
+		return self.lastLayer.forward(y, t)
+
+	def gradient(self, x, t):
+		self.loss(x, t)
+		dout = 1
+		dout = self.lastLayer.backward(dout)
+		layers = list(self.layers.values())
+		layers.reverse()
+
+		for layer in layers:
+			dout = layer.backward(dout)
+
+		grads = {}
+		grads['W1'], grads['b1'] = self.layers['Affine1'].dW, self.layers['Affine1'].db
+		grads['W2'], grads['b2'] = self.layers['Affine2'].dW, self.layers['Affine2'].db
+		return grads
 
 	def default_weight_initializer(self):
 		self.biases = [np.random.randn(y, 1) for y in self.sizes[1:]]
@@ -145,16 +197,32 @@ class Network(object):
 		lr_loader.store_result(self.sizes, self.weights, self.biases)
 
 	def update_mini_batch(self, mini_batch, eta, lmbda, n):
-		nabla_b = [np.zeros(b.shape) for b in self.biases]
-		nabla_w = [np.zeros(w.shape) for w in self.weights]
-		for x, y in mini_batch:
-			delta_nabla_b, delta_nabla_w = self.backprop(x, y)
-			nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
-			nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
-		self.weights = [(1-eta*(lmbda/n))*w-(eta/len(mini_batch))*nw
-						for w, nw in zip(self.weights, nabla_w)]
-		self.biases = [b-(eta/len(mini_batch))*nb
-					   for b, nb in zip(self.biases, nabla_b)]
+		#nabla_b = [np.zeros(b.shape) for b in self.biases]
+		#nabla_w = [np.zeros(w.shape) for w in self.weights]
+		#for x, y in mini_batch:
+		#	delta_nabla_b, delta_nabla_w = self.backprop(x, y)
+		#	nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
+		#	nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
+		#self.weights = [(1-eta*(lmbda/n))*w-(eta/len(mini_batch))*nw
+		#				for w, nw in zip(self.weights, nabla_w)]
+		#self.biases = [b-(eta/len(mini_batch))*nb
+		#			   for b, nb in zip(self.biases, nabla_b)]
+
+		x_batch, t_batch = [], []
+		for n in mini_batch:
+			x_batch.append(np.array(n[0]))
+		for n in mini_batch:
+			t_batch.append(np.array(n[1]))
+
+		#x_batch = x_batch.reshape(len(x_batch), len(x_batch[0]))
+		#t_batch = t_batch.reshape(len(t_batch))
+
+		grad = self.gradient(x_batch, t_batch)
+
+		self.weights[0] -= eta * grad['W1'] / len(mini_batch)
+		self.weights[1] -= eta * grad['W2'] / len(mini_batch)
+		self.biases[0]  -= eta * grad['b1'] / len(mini_batch)
+		self.biases[1]  -= eta * grad['b2'] / len(mini_batch)
 
 	def backprop(self, x, y):
 		nabla_b = [np.zeros(b.shape) for b in self.biases]
@@ -188,7 +256,7 @@ class Network(object):
 		return (nabla_b, nabla_w)
 
 	def accuracy(self, data, convert=False):
-		results = [(self.feedforward(x), y) for (x, y) in data]
+		results = [(self.feedforward(x.reshape(1, len(x))), y) for (x, y) in data]
 		sum_correct = 0
 		for result in results:
 			i_idx, o_idx = np.argmax(result[0]), np.argmax(result[1])
@@ -198,7 +266,7 @@ class Network(object):
 	def total_cost(self, data, lmbda, convert=False):
 		cost = 0.0
 		for x, y in data:
-			a = self.feedforward(x)
+			a = self.feedforward(x.reshape(1, len(x)))
 			if convert: y = vectorized_result(y)
 			cost += self.cost.fn(a, y)/len(data)
 		cost += 0.5*(lmbda/len(data))*sum(
@@ -239,3 +307,28 @@ def sigmoid(z):
 
 def sigmoid_prime(z):
 	return sigmoid(z)*(1-sigmoid(z))
+
+def crossEntropyLoss(y, t):
+	if y.ndim == 1:
+		t = t.reshape(1, t.size)
+		y = y.reshape(1, y.size)
+
+	t = np.array(t)
+
+	if t.size == y.size:
+		t = t.argmax(axis=1)
+
+	batch_size = y.shape[0]
+	#return -np.sum(np.log(y[np.arrange(batch_size), t])) / batch_size
+	return -np.sum(np.log(y[np.arange(batch_size), t]))
+
+
+def softmax(x):
+	if x.ndim == 2:
+		x = x.T
+		x = x - np.max(x, axis=0)
+		y = np.exp(x) / np.sum(np.exp(x), axis=0)
+		return y.T
+
+	x = x - np.max(x)
+	return np.exp(x) / np.sum(np.exp(x))

@@ -53,14 +53,18 @@ def decodeArrangement(first_half, last_half):
 		arrangement_int, tmp_a = divmod(arrangement_int, 3)
 		tmpArrangements.append(tmp_a)
 	tmpArrangements.reverse()
+	#arrangements = np.array([])
 	arrangements = []
 	for tmpArrangement in tmpArrangements:
 		if tmpArrangement == 2:
 			arrangements.extend([1.0, 0.0, 0.0])
+			#arrangements = np.append(arrangements, [1.0, 0.0, 0.0])
 		elif tmpArrangement == 1:
 			arrangements.extend([0.0, 1.0, 0.0])
+			#arrangements = np.append(arrangements, [0.0, 1.0, 0.0])
 		elif tmpArrangement == 0:
 			arrangements.extend([0.0, 0.0, 1.0])
+			#arrangements = np.append(arrangements, [0.0, 0.0, 1.0])
 	return arrangements
 
 def decodeMove(moveIndex):
