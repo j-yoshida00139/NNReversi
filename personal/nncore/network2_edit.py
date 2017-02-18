@@ -46,12 +46,9 @@ class AffineLayer(object):
 
 	def forward(self, x):
 		self.original_x_shape = x.shape
-		#self.original_x_shape = np.array(x).shape
 		x = x.reshape(x.shape[0], -1)
 		self.x = x
-		#self.x = np.array(x).reshape(len(x), len(x[0]))
 		out = np.dot(self.x, self.w) + self.b
-		#out = np.dot(self.x, self.w) + self.b.reshape(len(self.b))
 		return out
 
 	def backward(self, dout):
@@ -100,7 +97,6 @@ class SoftmaxCrossEntropyLayer(object):
 		self.t = None
 
 	def forward(self, x, t):
-		#self.t = np.array(t)
 		self.t = t
 		self.y = softmax(x)
 		self.loss = crossEntropyLoss(self.y, self.t)
@@ -109,8 +105,6 @@ class SoftmaxCrossEntropyLayer(object):
 	def backward(self, dout=1):
 		batch_size = self.t.shape[0]
 		if self.t.size == self.y.size:
-			#self.t = self.t.reshape(len(self.t), len(self.t[0]))
-			#self.y = self.y.reshape(len(self.y), len(self.y[0]))
 			dx = (self.y - self.t) / batch_size
 		else:
 			dx = self.y.copy()
@@ -126,17 +120,11 @@ class Network(object):
 	def __init__(self, sizes, cost=CrossEntropyCost):
 		self.sizes = sizes
 		self.sizes, self.weights, self.biases = lr_loader.load_data(sizes)
-		self.weights[0] = 0.01 * np.random.randn(self.sizes[0], self.sizes[1])
-		self.biases[0]  = np.zeros(self.sizes[1])
-		self.weights[1] = 0.01 * np.random.randn(self.sizes[1], self.sizes[2])
-		self.biases[1]  = np.zeros(self.sizes[2])
 
 		self.layers = OrderedDict()
 		self.layers['Affine1'] = AffineLayer(self.weights[0], self.biases[0])
-		#self.layers['Sigmoid1'] = SigmoidLayer()
 		self.layers['Relu1'] = Relu()
 		self.layers['Affine2'] = AffineLayer(self.weights[1], self.biases[1])
-		#self.layers['Sigmoid2'] = SigmoidLayer()
 		self.lastLayer = SoftmaxCrossEntropyLayer()
 
 	def feedforward(self, x):
@@ -212,11 +200,6 @@ class Network(object):
 			t_batch.append(np.array(n[1]))
 		grad = self.gradient(x_batch, t_batch)
 
-		#self.weights[0] -= eta * grad['W1'] / len(mini_batch)
-		#self.weights[1] -= eta * grad['W2'] / len(mini_batch)
-		#self.biases[0]  -= eta * grad['b1'] / len(mini_batch)
-		#self.biases[1]  -= eta * grad['b2'] / len(mini_batch)
-
 		self.weights[0] -= eta * grad['W1']
 		self.weights[1] -= eta * grad['W2']
 		self.biases[0] -= eta * grad['b1']
@@ -224,24 +207,19 @@ class Network(object):
 		self.layers['Affine1'] = AffineLayer(self.weights[0], self.biases[0])
 		self.layers['Affine2'] = AffineLayer(self.weights[1], self.biases[1])
 
-
-
-
-
 # Miscellaneous functions
 def sigmoid(z):
-	#a = np.where(z > 500.0, 500.0, z)
-	a = np.where(z < -500.0, -500.0, z)
+	#a = np.where(z < -500.0, -500.0, z)
 
-	b = []
-	for x in a:
-		b.append(np.exp(-x))
-	a = np.where(a<-10.0, 0.0, np.exp(-a))
-	a = 1.0/(1.0+a)
+	#b = []
+	#for x in a:
+	#	b.append(np.exp(-x))
+	#a = np.where(a<-10.0, 0.0, np.exp(-a))
+	#a = 1.0/(1.0+a)
 	#a = np.where(a<-10.0, 0.0, 1.0/(1.0+np.exp(-a)))
 
 	#return np.where(z<-10.0, 0.0, 1.0/(1.0+np.exp(-z)))
-	return a
+	return 1.0/(1.0+np.exp(-z))
 
 
 def sigmoid_prime(z):
@@ -253,15 +231,11 @@ def crossEntropyLoss(y, t):
 		t = t.reshape(1, t.size)
 		y = y.reshape(1, y.size)
 
-	#t = np.array(t)
-
 	if t.size == y.size:
 		t = t.argmax(axis=1)
 
 	batch_size = y.shape[0]
 	return -np.sum(np.log(y[np.arange(batch_size), t])) / batch_size
-#return -np.sum(np.log(y[np.arange(batch_size), t]))
-
 
 def softmax(x):
 	if x.ndim == 2:

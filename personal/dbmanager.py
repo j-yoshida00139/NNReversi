@@ -78,15 +78,19 @@ def decodeMove(moveIndex):
 
 def get_data_by_list(n_list):
 	bestMoveList = BestMove.BestMove.retrieveAll()
+	tmparrangementList = []
+	tmpmoveList = []
+	for bestMove in bestMoveList:
+		tmparrangementList.append(decodeArrangement(bestMove.first_half_arrangement, bestMove.last_half_arrangement))
+		tmpmoveList.append(decodeMove(bestMove.move_index))
 	arrangementList = []
 	moveList = []
-	for bestMove in bestMoveList:
-		arrangementList.append(decodeArrangement(bestMove.first_half_arrangement, bestMove.last_half_arrangement))
-		moveList.append(decodeMove(bestMove.move_index))
-	arrangementList = [np.reshape(x, (192, 1)) for x in arrangementList]
-	moveList = [np.reshape(x, (64, 1)) for x in moveList]
-	allResultList = list(zip(arrangementList, moveList))
-	resultList = []
 	for i in n_list:
-		resultList.append(allResultList[i])
-	return resultList
+		arrangementList.append(tmparrangementList[i])
+		moveList.append(tmpmoveList[i])
+	arrangementList = np.array([np.reshape(x, (192)) for x in arrangementList])
+	moveList = np.array([np.reshape(x, (64)) for x in moveList])
+	#allResultList = list(zip(arrangementList, moveList))
+	#resultList = []
+	#return resultList
+	return arrangementList, moveList
