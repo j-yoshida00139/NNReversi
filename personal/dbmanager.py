@@ -38,6 +38,7 @@ def migrateFromText():
 		bestMove = BestMove.BestMove(first_half_arrangement = firstHalf, last_half_arrangement = lastHalf, move_index = outIndex)
 		bestMove.save()
 
+
 def encodeArrangement(arrangeList):
 	arrangeInt = 0
 	np_inputs = np.array(arrangeList).reshape((-1, 3))
@@ -45,6 +46,7 @@ def encodeArrangement(arrangeList):
 		input = int(a * 2 + b * 1 + c * 0)
 		arrangeInt = arrangeInt * 3 + input
 	return arrangeInt
+
 
 def decodeArrangement(first_half, last_half):
 	arrangement_int = first_half * int(1E16) + last_half
@@ -66,6 +68,7 @@ def decodeArrangement(first_half, last_half):
 			arrangements.extend([0.0, 0.0, 1.0])
 			#arrangements = np.append(arrangements, [0.0, 0.0, 1.0])
 	return arrangements
+
 
 def decodeMove(moveIndex):
 	moveList = [0.0 for x in range(64)]

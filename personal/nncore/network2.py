@@ -86,8 +86,8 @@ class Network(object):
                 training_cost.append(cost)
                 print("Cost on training data      : {}".format(cost))
             if monitor_evaluation_cost:
-                #cost = self.total_cost(evaluation_data, lmbda, convert=True)
-                cost = self.total_cost(evaluation_data, lmbda)
+                cost = self.total_cost(evaluation_data, lmbda, convert=True)
+                #cost = self.total_cost(evaluation_data, lmbda)
                 evaluation_cost.append(cost)
                 print("Cost on evaluation data    : {}".format(cost))
             if monitor_training_accuracy:
