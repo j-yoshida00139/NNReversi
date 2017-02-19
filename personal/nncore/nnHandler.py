@@ -7,7 +7,9 @@ import move_loader
 import sys, os.path
 sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir))
 sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir) + '/utils')
-import network2_edit
+import network
+from utils.trainer import Trainer
+from mnist import load_mnist
 
 class NNHandler(object):
 	def __init__(self):
@@ -32,8 +34,16 @@ class NNHandler(object):
 
 		for x in range(1):
 			print("cycle number : {0:03d}".format(x+1))
-			x_train, t_train, x_eva, t_eva, x_test, t_test = move_loader.load_data(maxFileNo)
-			net = network2_edit.Network(self.size)
-			net.SGD(x_train, t_train, n_epoch, n_batch_size, coe_learn, x_eva, t_eva)
+			x_train, t_train, x_eva, t_eva, x_test, t_test = move_loader.load_data(maxFileNo, flatten=False)
+
+			#(x_train, t_train), (x_test, t_test) = load_mnist(flatten=False)
+			net = network.Network()
+			trainer = Trainer(net, x_train, t_train, x_test, t_test,
+			                  epochs=20, mini_batch_size=100,
+			                  optimizer='Adam', optimizer_param={'lr':0.001},
+			                  evaluate_sample_num_per_epoch=1000)
+			trainer.train()
+			#net = network2_edit.Network(self.size)
+			#net.SGD(x_train, t_train, n_epoch, n_batch_size, coe_learn, x_eva, t_eva)
 
 
