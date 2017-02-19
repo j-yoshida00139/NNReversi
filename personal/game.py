@@ -7,7 +7,7 @@ import numpy as np
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/nncore')
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/utils')
 import network2_edit
-import basicFunc
+import basicFunc, mathFunc
 import storeBestMove
 
 n_input = 192 #366
@@ -247,7 +247,7 @@ class Game(object):
 		if nnFlag:
 			arrangeList = self.returnNnInputList(self.arrange, self.nextColor)
 			move = self.net.feedforward(np.array(arrangeList).T) #move[0][0:63]
-			move = self.net.softmax(move)
+			move = mathFunc.softmax(move)
 		else:
 			move = np.random.rand(1,64) #move[0][0:63]
 		index = np.argmax(move[0]*self.getCanPutList(self.nextColor))

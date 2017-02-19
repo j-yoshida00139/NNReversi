@@ -13,7 +13,7 @@ n_input = 192 #366
 n_neutral_neuron = 100
 n_output = 64 #12
 
-numGames = 1000
+numGames = 100
 #numGames = 1
 numWin = 0
 
