@@ -48,6 +48,8 @@ class AffineLayer(object):
 		self.original_x_shape = x.shape
 		x = x.reshape(x.shape[0], -1)
 		self.x = x
+
+		out_temp = np.dot(self.x, self.w)
 		out = np.dot(self.x, self.w) + self.b
 		return out
 
@@ -112,6 +114,8 @@ class SoftmaxCrossEntropyLayer(object):
 			dx = dx / batch_size
 
 		return dx
+
+
 
 
 #### Main Network class
@@ -207,6 +211,16 @@ class Network(object):
 		self.layers['Affine1'] = AffineLayer(self.weights[0], self.biases[0])
 		self.layers['Affine2'] = AffineLayer(self.weights[1], self.biases[1])
 
+	def softmax(self, x):
+		if x.ndim == 2:
+			x = x.T
+			x -= np.max(x, axis=0)
+			y = np.exp(x) / np.sum(np.exp(x), axis=0)
+			return y.T
+
+		x -= np.max(x)
+		return np.exp(x) / np.sum(np.exp(x))
+
 # Miscellaneous functions
 def sigmoid(z):
 	#a = np.where(z < -500.0, -500.0, z)
@@ -236,6 +250,7 @@ def crossEntropyLoss(y, t):
 
 	batch_size = y.shape[0]
 	return -np.sum(np.log(y[np.arange(batch_size), t])) / batch_size
+
 
 def softmax(x):
 	if x.ndim == 2:

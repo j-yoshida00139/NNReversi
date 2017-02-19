@@ -6,7 +6,7 @@ from os.path import isfile, join
 import numpy as np
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/nncore')
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/utils')
-import network2
+import network2_edit
 import basicFunc
 import storeBestMove
 
@@ -38,7 +38,7 @@ class Game(object):
 		self.blackMove = []
 		self.whiteMove = []
 		self.nextColor = self.BLACK if nextColor == 0 else nextColor
-		self.net = network2.Network(size)
+		self.net = network2_edit.Network(size)
 
 
 	def initialize(self):
@@ -246,7 +246,8 @@ class Game(object):
 	def goNextWithAutoMove(self, nnFlag=False):
 		if nnFlag:
 			arrangeList = self.returnNnInputList(self.arrange, self.nextColor)
-			move = self.net.feedforward(arrangeList) #move[0][0:63]
+			move = self.net.feedforward(np.array(arrangeList).T) #move[0][0:63]
+			move = self.net.softmax(move)
 		else:
 			move = np.random.rand(1,64) #move[0][0:63]
 		index = np.argmax(move[0]*self.getCanPutList(self.nextColor))

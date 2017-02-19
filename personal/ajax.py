@@ -7,8 +7,9 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/utils')
 import json
 from django.http import Http404, HttpResponse
 import network
+import network2_edit
 import csv
-#import numpy as np
+import numpy as np
 import game
 import basicFunc
 
@@ -29,16 +30,19 @@ def nextMove(request):
 
 		arrangeArray = json.loads(arrange)
 		canPutList = json.loads(canPut)
-
 		arrangeList = mainGame.returnNnInputList(arrangeArray, colorInt)
 
 		size = [n_input, n_neutral_neuron, n_output]
-		net = network.Network(size)
+		#net = network.Network(size)
+		net = network2_edit.Network(size)
 
+		arrangeList = np.array(arrangeList).T
 		result = net.feedforward(arrangeList)
 		resultList = []
-		for resultValue in result:
+		for resultValue in result[0]:
+			print(resultValue)
 			resultList.append(float(resultValue))
+		resultList = net.softmax(np.array(resultList))
 
 		outputList = []
 		for i in range(0, len(resultList)-1):
@@ -89,3 +93,4 @@ def storeWinnersData(request):
 		return HttpResponse(winnersDataArray, content_type='application/json')
 	else:
 		raise Http404
+
