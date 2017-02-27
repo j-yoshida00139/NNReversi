@@ -5,7 +5,10 @@ import mathFunc
 from util import im2col, col2im
 
 class AffineLayer(object):
-	def __init__(self, w, b):
+	def __init__(self):
+		pass
+
+	def setParams(self, w, b):
 		self.w = w
 		self.b = b
 
@@ -13,6 +16,9 @@ class AffineLayer(object):
 		self.original_x_shape = None
 		self.dw = None
 		self.db = None
+
+		self.FN = self.b.shape[0]
+		self.height, self.width = 1, 1
 
 	def forward(self, x):
 		self.original_x_shape = x.shape
@@ -191,11 +197,17 @@ class BatchNormalization:
 
 
 class Convolution:
-	def __init__(self, W, b, stride=1, pad=0):
+	def __init__(self):
+		pass
+
+	def setParams(self, W, b, stride=1, pad=0, pre_height=0, pre_width=0):
 		self.W = W
 		self.b = b
 		self.stride = stride
 		self.pad = pad
+		self.FN, _C, FH, FW = self.W.shape
+		self.height = int((pre_height + 2 * self.pad - (FH - 1)) / self.stride)
+		self.width  = int((pre_width  + 2 * self.pad - (FW - 1)) / self.stride)
 
 		# 中間データ（backward時に使用）
 		self.x = None
@@ -205,6 +217,7 @@ class Convolution:
 		# 重み・バイアスパラメータの勾配
 		self.dW = None
 		self.db = None
+
 
 	def forward(self, x):
 		FN, C, FH, FW = self.W.shape
@@ -239,7 +252,10 @@ class Convolution:
 
 
 class Pooling:
-	def __init__(self, pool_h, pool_w, stride=1, pad=0):
+	def __init__(self):
+		pass
+
+	def setParams(self, pool_h, pool_w, stride=1, pad=0, C=1, pre_height=0, pre_width=0):
 		self.pool_h = pool_h
 		self.pool_w = pool_w
 		self.stride = stride
@@ -247,6 +263,10 @@ class Pooling:
 
 		self.x = None
 		self.arg_max = None
+
+		self.FN = C
+		self.height = int((pre_height + self.pad * 2) / self.stride)
+		self.width  = int((pre_width  + self.pad * 2) / self.stride)
 
 	def forward(self, x):
 		N, C, H, W = x.shape
@@ -277,3 +297,9 @@ class Pooling:
 		dx = col2im(dcol, self.x.shape, self.pool_h, self.pool_w, self.stride, self.pad)
 
 		return dx
+
+	#def getDimension(self, C, pre_height, pre_width):
+	#	H = int((pre_height + self.pad * 2) / self.stride)
+	#	W  = int((pre_width  + self.pad * 2) / self.stride)
+	#	return C, H, W
+

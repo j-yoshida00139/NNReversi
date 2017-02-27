@@ -20,7 +20,7 @@ class NNHandler(object):
 		print("loaded")
 
 	def learn(self):
-		maxFileNo = 18000
+		maxFileNo = 1800
 
 		n_epoch = 10000
 		n_batch_size = 100

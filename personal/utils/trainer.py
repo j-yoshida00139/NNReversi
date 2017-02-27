@@ -10,8 +10,9 @@ class Trainer:
 	"""
 
 	def __init__(self, network, x_train, t_train, x_test, t_test,
-	             epochs=20, mini_batch_size=100,
-	             optimizer='SGD', optimizer_param={'lr':0.001},
+	             #epochs=20, mini_batch_size=100,
+	             epochs=100, mini_batch_size=100,
+	             optimizer='SGD', optimizer_param={'lr':0.01},
 	             evaluate_sample_num_per_epoch=None, verbose=True):
 		self.network = network
 		self.verbose = verbose
@@ -79,4 +80,7 @@ class Trainer:
 		if self.verbose:
 			print("=============== Final Test Accuracy ===============")
 			print("test acc:" + str(test_acc))
+
+		self.network.save_params()
+
 
