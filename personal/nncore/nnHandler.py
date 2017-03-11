@@ -20,7 +20,7 @@ class NNHandler(object):
 		print("loaded")
 
 	def learn(self):
-		maxFileNo = 1800
+		maxFileNo = 32000
 
 		n_epoch = 10000
 		n_batch_size = 100
@@ -36,14 +36,9 @@ class NNHandler(object):
 			print("cycle number : {0:03d}".format(x+1))
 			x_train, t_train, x_eva, t_eva, x_test, t_test = move_loader.load_data(maxFileNo, flatten=False)
 
-			#(x_train, t_train), (x_test, t_test) = load_mnist(flatten=False)
 			net = network.Network()
 			trainer = Trainer(net, x_train, t_train, x_test, t_test,
 			                  epochs=20, mini_batch_size=100,
 			                  optimizer='Adam', optimizer_param={'lr':0.001},
 			                  evaluate_sample_num_per_epoch=1000)
 			trainer.train()
-			#net = network2_edit.Network(self.size)
-			#net.SGD(x_train, t_train, n_epoch, n_batch_size, coe_learn, x_eva, t_eva)
-
-

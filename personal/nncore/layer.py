@@ -17,9 +17,6 @@ class AffineLayer(object):
 		self.dw = None
 		self.db = None
 
-		self.FN = self.b.shape[0]
-		self.height, self.width = 1, 1
-
 	def forward(self, x):
 		self.original_x_shape = x.shape
 		x = x.reshape(x.shape[0], -1)
@@ -200,14 +197,11 @@ class Convolution:
 	def __init__(self):
 		pass
 
-	def setParams(self, W, b, stride=1, pad=0, pre_height=0, pre_width=0):
+	def setParams(self, W, b, stride=1, pad=0):
 		self.W = W
 		self.b = b
 		self.stride = stride
 		self.pad = pad
-		self.FN, _C, FH, FW = self.W.shape
-		self.height = int((pre_height + 2 * self.pad - (FH - 1)) / self.stride)
-		self.width  = int((pre_width  + 2 * self.pad - (FW - 1)) / self.stride)
 
 		# 中間データ（backward時に使用）
 		self.x = None
@@ -255,7 +249,7 @@ class Pooling:
 	def __init__(self):
 		pass
 
-	def setParams(self, pool_h, pool_w, stride=1, pad=0, C=1, pre_height=0, pre_width=0):
+	def setParams(self, pool_h, pool_w, stride=1, pad=0):
 		self.pool_h = pool_h
 		self.pool_w = pool_w
 		self.stride = stride
@@ -263,10 +257,6 @@ class Pooling:
 
 		self.x = None
 		self.arg_max = None
-
-		self.FN = C
-		self.height = int((pre_height + self.pad * 2) / self.stride)
-		self.width  = int((pre_width  + self.pad * 2) / self.stride)
 
 	def forward(self, x):
 		N, C, H, W = x.shape

@@ -50,6 +50,18 @@ class BestMove(object):
 		return bestMoveList
 
 	@staticmethod
+	def retrieveFromArrange(first_half, last_half):
+		conn = sqlite3.connect('../db.sqlite3')
+		bestMove = None
+		with conn:
+			cursor = conn.cursor()
+			cursor.execute("select id, first_half_arrangement, last_half_arrangement, move_index, created_at, updated_at from best_moves where first_half_arrangement=? and last_half_arrangement=?", (first_half, last_half))
+			for result in cursor.fetchall():
+				bestMove = BestMove(*result)
+		return bestMove
+
+
+	@staticmethod
 	def getCount():
 		conn = sqlite3.connect('../../db.sqlite3')
 		with conn:

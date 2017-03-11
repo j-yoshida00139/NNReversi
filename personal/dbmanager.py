@@ -34,9 +34,10 @@ def migrateFromText():
 		firstHalf, lastHalf = divmod(inputInt, int(1E16))
 		outIndex = np.argmax(outputs)
 		outIndex = int(outIndex)
-		print(firstHalf, lastHalf)
 		bestMove = BestMove.BestMove(first_half_arrangement = firstHalf, last_half_arrangement = lastHalf, move_index = outIndex)
 		bestMove.save()
+
+def replicateMoveData():
 
 
 def encodeArrangement(arrangeList):
@@ -60,13 +61,10 @@ def decodeArrangement(first_half, last_half):
 	for tmpArrangement in tmpArrangements:
 		if tmpArrangement == 2:
 			arrangements.extend([1.0, 0.0, 0.0])
-			#arrangements = np.append(arrangements, [1.0, 0.0, 0.0])
 		elif tmpArrangement == 1:
 			arrangements.extend([0.0, 1.0, 0.0])
-			#arrangements = np.append(arrangements, [0.0, 1.0, 0.0])
 		elif tmpArrangement == 0:
 			arrangements.extend([0.0, 0.0, 1.0])
-			#arrangements = np.append(arrangements, [0.0, 0.0, 1.0])
 	return arrangements
 
 
@@ -90,7 +88,4 @@ def get_data_by_list(n_list):
 		moveList.append(tmpmoveList[i])
 	arrangementList = np.array([np.reshape(x, (192)) for x in arrangementList])
 	moveList = np.array([np.reshape(x, (64)) for x in moveList])
-	#allResultList = list(zip(arrangementList, moveList))
-	#resultList = []
-	#return resultList
 	return arrangementList, moveList

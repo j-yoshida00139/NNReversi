@@ -7,11 +7,11 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/utils')
 import json
 from django.http import Http404, HttpResponse
 import network
-import network2_edit
+#import network2_edit
 import csv
 import numpy as np
 import game
-import basicFunc
+import basicFunc, mathFunc
 
 n_input = 192 #366
 n_neutral_neuron = 100
@@ -31,18 +31,14 @@ def nextMove(request):
 		arrangeArray = json.loads(arrange)
 		canPutList = json.loads(canPut)
 		arrangeList = mainGame.returnNnInputList(arrangeArray, colorInt)
+		arrangeList = basicFunc.convInput(arrangeList)
 
-		size = [n_input, n_neutral_neuron, n_output]
-		#net = network.Network(size)
-		net = network2_edit.Network(size)
-
-		arrangeList = np.array(arrangeList).T
+		net = network.Network()
 		result = net.feedforward(arrangeList)
 		resultList = []
 		for resultValue in result[0]:
-			print(resultValue)
 			resultList.append(float(resultValue))
-		resultList = net.softmax(np.array(resultList))
+		resultList = mathFunc.softmax(np.array(resultList))
 
 		outputList = []
 		for i in range(0, len(resultList)-1):
@@ -50,11 +46,6 @@ def nextMove(request):
 
 		index = outputList.index(max(outputList))
 		row, col = divmod(index, 8)
-
-		#tmp
-		#tmpGame = game.Game(8, 8, basicFunc.unsharedCopy(arrangeArray), colorInt)
-		#row, col, winRatio = tmpGame.findBestMove()
-		#tmp
 
 		cellJson = json.dumps({"row": row,"col": col})
 

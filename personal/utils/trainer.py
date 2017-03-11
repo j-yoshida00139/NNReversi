@@ -10,10 +10,10 @@ class Trainer:
 	"""
 
 	def __init__(self, network, x_train, t_train, x_test, t_test,
-	             #epochs=20, mini_batch_size=100,
-	             epochs=100, mini_batch_size=100,
-	             optimizer='SGD', optimizer_param={'lr':0.01},
-	             evaluate_sample_num_per_epoch=None, verbose=True):
+					#epochs=20, mini_batch_size=100,
+					epochs=100, mini_batch_size=100,
+					optimizer='SGD', optimizer_param={'lr':0.01},
+					evaluate_sample_num_per_epoch=None, verbose=True):
 		self.network = network
 		self.verbose = verbose
 		self.x_train = x_train
@@ -26,7 +26,7 @@ class Trainer:
 
 		# optimzer
 		optimizer_class_dict = {'sgd':SGD, 'momentum':Momentum, 'nesterov':Nesterov,
-		                        'adagrad':AdaGrad, 'rmsprpo':RMSprop, 'adam':Adam}
+								'adagrad':AdaGrad, 'rmsprpo':RMSprop, 'adam':Adam}
 		self.optimizer = optimizer_class_dict[optimizer.lower()](**optimizer_param)
 
 		self.train_size = x_train.shape[0]

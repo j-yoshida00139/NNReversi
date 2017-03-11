@@ -6,7 +6,8 @@ from os.path import isfile, join
 import numpy as np
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/nncore')
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/utils')
-import network2_edit
+#import network2_edit
+import network
 import basicFunc, mathFunc
 import storeBestMove
 
@@ -26,6 +27,7 @@ directions = [
 	{"row": 1, "col": 1}
 ]
 
+net = network.Network()
 
 class Game(object):
 	def __init__(self, rows, cols, arrangeList=[], nextColor=0):
@@ -38,8 +40,8 @@ class Game(object):
 		self.blackMove = []
 		self.whiteMove = []
 		self.nextColor = self.BLACK if nextColor == 0 else nextColor
-		self.net = network2_edit.Network(size)
-
+		self.net = net
+		#self.net = network2_edit.Network(size)
 
 	def initialize(self):
 		upRow   = math.floor((self.rows-1)/2)
@@ -246,7 +248,9 @@ class Game(object):
 	def goNextWithAutoMove(self, nnFlag=False):
 		if nnFlag:
 			arrangeList = self.returnNnInputList(self.arrange, self.nextColor)
-			move = self.net.feedforward(np.array(arrangeList).T) #move[0][0:63]
+			arrangeList = basicFunc.convInput(arrangeList)
+			move = self.net.feedforward(np.array(arrangeList)) #move[0][0:63]
+			#move = self.net.feedforward(np.array(arrangeList).T) #move[0][0:63]
 			move = mathFunc.softmax(move)
 		else:
 			move = np.random.rand(1,64) #move[0][0:63]
@@ -270,6 +274,7 @@ class Game(object):
 			row, col = divmod(index, 8)
 			tmpGame.goNextWithManualMove(row, col)
 			tmpWinRatio = storeBestMove.calcWinRatio(tmpGame.arrange, tmpGame.nextColor, self.nextColor)
+			#print("    row:%d, col:%d, WinRatio:%f" % (row, col, tmpWinRatio))
 			if tmpWinRatio >= winRatio:
 				bestRow, bestCol, winRatio = row, col, tmpWinRatio
 		return bestRow, bestCol, winRatio

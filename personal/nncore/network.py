@@ -1,18 +1,17 @@
-from collections import OrderedDict
 from layer import *
 import numpy as np
 import pickle
-import math
+import math, os
 
 class Network(object):
 	def __init__(self, input_dim=(3, 8, 8),
-				convParams = [{'filter_num':16, 'filter_size':4, 'pad':2, 'stride':1},
+				convParams = ({'filter_num':16, 'filter_size':4, 'pad':2, 'stride':1},
 								{'filter_num':16, 'filter_size':4, 'pad':2, 'stride':1},
 								{'filter_num':32, 'filter_size':4, 'pad':2, 'stride':1},
 								{'filter_num':32, 'filter_size':4, 'pad':2, 'stride':1},
 								{'filter_num':64, 'filter_size':4, 'pad':2, 'stride':1},
-								{'filter_num':64, 'filter_size':2, 'pad':1, 'stride':1}],
-				affineParams = [100, 64]):  #hidden_size=100, output_size=100
+								{'filter_num':64, 'filter_size':2, 'pad':1, 'stride':1}),
+				affineParams = (100, 64)):  #hidden_size=100, output_size=100
 
 		# declare layers ===========
 		self.layers = []
@@ -33,37 +32,23 @@ class Network(object):
 		self.layers.append(AffineLayer())
 		self.last_layer = SoftmaxCrossEntropyLayer()
 
-		self.params = {}
-		prmIdx = 0
-		pre_channel, pre_height, pre_width = input_dim
-		affine_iter, conv_iter = iter(affineParams), iter(convParams)
-		for layer in self.layers:
-			if isinstance(layer, Relu):
-				continue
+		if os.path.exists("params.pkl"):
+			self.load_params()
+		else:
+			self.initParams(input_dim, convParams, affineParams)
 
+		prmIdx = 0
+		conv_iter = iter(convParams)
+		for layer in self.layers:
 			if isinstance(layer, Convolution):
 				convParam = next(conv_iter)
-				conn_to_pre_layer = pre_channel * (convParam['filter_size'] ** 2)
-				weight_init_scale = math.sqrt(2.0 / conn_to_pre_layer)
-				self.params['W' + str(prmIdx + 1)] = weight_init_scale * \
-								np.random.randn(convParam['filter_num'], pre_channel,
-								                convParam['filter_size'], convParam['filter_size'])
-				self.params['b' + str(prmIdx + 1)] = np.zeros(convParam['filter_num'])
-				layer.setParams(self.params['W' + str(prmIdx + 1)], self.params['b' + str(prmIdx + 1)], convParam['stride'], convParam['pad'], pre_height, pre_width)
-
-			elif isinstance(layer, Pooling): # no parameter
-				layer.setParams(pool_h=2, pool_w=2, stride=2, C=pre_channel, pre_height=pre_height, pre_width=pre_width)
-
+				layer.setParams(self.params['W' + str(prmIdx + 1)], self.params['b' + str(prmIdx + 1)], convParam['stride'], convParam['pad'])
+				prmIdx += 1
+			elif isinstance(layer, Pooling):
+				layer.setParams(pool_h=2, pool_w=2, stride=2)
 			elif isinstance(layer, AffineLayer):
-				affineParam = next(affine_iter)
-				conn_to_pre_layer = pre_channel * pre_height * pre_width
-				weight_init_scale = math.sqrt(2.0 / conn_to_pre_layer)
-				self.params['W' + str(prmIdx + 1)] = weight_init_scale * np.random.randn(pre_channel * pre_height * pre_width, affineParam)
-				self.params['b' + str(prmIdx + 1)] = np.zeros(affineParam)
 				layer.setParams(self.params['W' + str(prmIdx + 1)], self.params['b' + str(prmIdx + 1)])
-
-			pre_channel, pre_height, pre_width = layer.FN, layer.height, layer.width
-			prmIdx = prmIdx + 1 if not(isinstance(layer, Pooling)) else prmIdx
+				prmIdx += 1
 
 	def feedforward(self, x, train_flg=False):
 		for layer in self.layers:
@@ -115,6 +100,47 @@ class Network(object):
 
 		return grads
 
+	def initParams(self, input_dim, convParams, affineParams):
+		self.params = {}
+		prmIdx = 0
+		pre_channel, pre_height, pre_width = input_dim
+		affine_iter, conv_iter = iter(affineParams), iter(convParams)
+		for layer in self.layers:
+			if isinstance(layer, Relu) or isinstance(layer, Dropout):
+				continue
+
+			if isinstance(layer, Convolution):
+				convParam = next(conv_iter)
+				conn_to_pre_layer = pre_channel * (convParam['filter_size'] ** 2)
+				weight_init_scale = math.sqrt(2.0 / conn_to_pre_layer)
+				self.params['W' + str(prmIdx + 1)] = weight_init_scale * \
+								np.random.randn(convParam['filter_num'], pre_channel,
+												convParam['filter_size'], convParam['filter_size'])
+				self.params['b' + str(prmIdx + 1)] = np.zeros(convParam['filter_num'])
+				FN, _C, FH, FW = self.params['W' + str(prmIdx + 1)].shape
+				height = int((pre_height + 2 * convParam['pad'] - (FH - 1)) / convParam['stride'])
+				width  = int((pre_width  + 2 * convParam['pad'] - (FW - 1)) / convParam['stride'])
+				pre_channel, pre_height, pre_width = FN, height, width
+
+			elif isinstance(layer, Pooling): # no parameter
+				height = int((pre_height + self.pad * 2) / self.stride)
+				width  = int((pre_width  + self.pad * 2) / self.stride)
+				pre_channel, pre_height, pre_width = pre_channel, height, width
+
+			elif isinstance(layer, AffineLayer):
+				affineParam = next(affine_iter)
+				conn_to_pre_layer = pre_channel * pre_height * pre_width
+				weight_init_scale = math.sqrt(2.0 / conn_to_pre_layer)
+
+				self.params['W' + str(prmIdx + 1)] = weight_init_scale * np.random.randn(pre_channel * pre_height * pre_width, affineParam)
+				self.params['b' + str(prmIdx + 1)] = np.zeros(affineParam)
+				FN = self.params['b' + str(prmIdx + 1)].shape[0]
+				height, width = 1, 1
+				pre_channel, pre_height, pre_width = FN, height, width
+
+			prmIdx = prmIdx + 1 if not(isinstance(layer, Pooling)) else prmIdx
+
+
 	def save_params(self, file_name="params.pkl"):
 		params = {}
 		for key, val in self.params.items():
@@ -123,12 +149,16 @@ class Network(object):
 			pickle.dump(params, f)
 
 	def load_params(self, file_name="params.pkl"):
+		self.params = {}
 		with open(file_name, 'rb') as f:
 			params = pickle.load(f)
 		for key, val in params.items():
 			self.params[key] = val
 
-		for i, layer_idx in enumerate((0, 2, 5, 7, 10, 12, 15, 18)):
-			self.layers[layer_idx].W = self.params['W' + str(i+1)]
-			self.layers[layer_idx].b = self.params['b' + str(i+1)]
+		idx = 0
+		for layer in self.layers:
+			if isinstance(layer, Convolution) or isinstance(layer, AffineLayer):
+				layer.W = self.params['W' + str(idx + 1)]
+				layer.b = self.params['b' + str(idx + 1)]
+				idx += 1
 
