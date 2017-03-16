@@ -30,7 +30,7 @@ def nextMove(request):
 
 		arrangeArray = json.loads(arrange)
 		canPutList = json.loads(canPut)
-		arrangeList = mainGame.returnNnInputList(arrangeArray, colorInt)
+		arrangeList = basicFunc.conv64ListToNnInputList(arrangeArray, colorInt)
 		arrangeList = basicFunc.convInput(arrangeList)
 
 		net = network.Network()
@@ -63,7 +63,7 @@ def storeWinnersData(request):
 
 		for i in range(len(winnersDataArray)):
 			winnersMove = winnersDataArray[i]
-			inputList = mainGame.returnNnInputList(winnersMove["arrange"], winnersMove["color"])
+			inputList = basicFunc.conv64ListToNnInputList(winnersMove["arrange"], winnersMove["color"])
 			fileNo = lastFileNo + i
 			fileNameInput  = os.path.dirname(os.path.abspath(__file__)) + "/nncore/winnersData/input_{0:08d}".format(fileNo+1)
 			fileNameOutput = os.path.dirname(os.path.abspath(__file__)) + "/nncore/winnersData/output_{0:08d}".format(fileNo+1)

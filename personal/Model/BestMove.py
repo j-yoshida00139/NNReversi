@@ -34,13 +34,22 @@ class BestMove(object):
 				cursor = conn.cursor()
 				cursor.execute("insert into best_moves (first_half_arrangement, last_half_arrangement, move_index) values (?, ?, ?)", (self.first_half_arrangement, self.last_half_arrangement, self.move_index))
 				conn.commit()
-			print("The data was added.")
 		except sqlite3.IntegrityError:
 			print ("couldn't add the data due to the data integrity problem.")
 
+	def update(self):
+		try:
+			conn = sqlite3.connect('../db.sqlite3')
+			with conn:
+				cursor = conn.cursor()
+				cursor.execute("update best_moves set move_index=? where first_half_arrangement=? and last_half_arrangement=?", (self.move_index, self.first_half_arrangement, self.last_half_arrangement))
+		except sqlite3.IntegrityError:
+			print("couldn't update the data due to the data integrity problem.")
+
 	@staticmethod
 	def retrieveAll():
-		conn = sqlite3.connect('../../db.sqlite3')
+		conn = sqlite3.connect('../db.sqlite3')
+		#conn = sqlite3.connect('../../db.sqlite3')
 		bestMoveList = []
 		with conn:
 			cursor = conn.cursor()

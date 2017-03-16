@@ -159,31 +159,12 @@ class Game(object):
 		for i in range(0, len(turnPieceList)):
 			self.putPiece(turnPieceList[i]["row"], turnPieceList[i]["col"], color)
 
-	@staticmethod
-	def returnNnInputList(rawArray, color):
-		arrangeList = []
-		for cols in rawArray:
-			for value in cols:
-				if value == 0:
-					arrangeList.append([float(1)])
-					arrangeList.append([float(0)])
-					arrangeList.append([float(0)])
-				elif value == color:
-					arrangeList.append([float(0)])
-					arrangeList.append([float(1)])
-					arrangeList.append([float(0)])
-				else:
-					arrangeList.append([float(0)])
-					arrangeList.append([float(0)])
-					arrangeList.append([float(1)])
-		return arrangeList
-
 	def storeWinnersData(self, winnersData):
 		lastFileNo = self.getLastFileNo()
 
 		for i in range(len(winnersData)):
 			winnersMove = winnersData[i]
-			inputList = Game.returnNnInputList(winnersMove["arrange"], winnersMove["color"])
+			inputList = basicFunc.conv64ListToNnInputList(winnersMove["arrange"], winnersMove["color"])
 			fileNo = lastFileNo + i
 			fileNameInput = os.path.dirname(os.path.abspath(__file__)) + "/nncore/winnersData/input_{0:08d}".format(
 				fileNo + 1)
@@ -247,7 +228,7 @@ class Game(object):
 
 	def goNextWithAutoMove(self, nnFlag=False):
 		if nnFlag:
-			arrangeList = self.returnNnInputList(self.arrange, self.nextColor)
+			arrangeList = basicFunc.conv64ListToNnInputList(self.arrange, self.nextColor)
 			arrangeList = basicFunc.convInput(arrangeList)
 			move = self.net.feedforward(np.array(arrangeList)) #move[0][0:63]
 			#move = self.net.feedforward(np.array(arrangeList).T) #move[0][0:63]

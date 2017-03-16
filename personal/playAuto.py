@@ -33,7 +33,7 @@ for i in range(0, numGames):
 	mainGame.initialize()
 	while not mainGame.isEnded():
 		if simulateFlg == 1:
-			inputList = game.Game.returnNnInputList(mainGame.arrange, mainGame.nextColor)
+			inputList = basicFunc.conv64ListToNnInputList(mainGame.arrange, mainGame.nextColor)
 			inputInt = dbmanager.encodeArrangement(inputList)
 			firstHalfInt, lastHalfInt = divmod(inputInt, int(1E16))
 			bestMove = BestMove.BestMove.retrieveFromArrange(firstHalfInt, lastHalfInt)

@@ -28,38 +28,37 @@ def retrieveFileNo(filename):
 		return 0
 
 
+def conv64ListToNnInputList(rawArray, color):
+	arrangeList = []
+	for cols in rawArray:
+		for value in cols:
+			if value == 0:
+				arrangeList.append([float(1)])
+				arrangeList.append([float(0)])
+				arrangeList.append([float(0)])
+			elif value == color:
+				arrangeList.append([float(0)])
+				arrangeList.append([float(1)])
+				arrangeList.append([float(0)])
+			else:
+				arrangeList.append([float(0)])
+				arrangeList.append([float(0)])
+				arrangeList.append([float(1)])
+	return arrangeList
+
+
 def storeWinnersData(winnersData):
 	tmpGame = game.Game(8, 8)
 	lastFileNo = getLastFileNo()
 	for i, winnersMove in list(enumerate(winnersData)):
-		inputList = game.Game.returnNnInputList(winnersMove["arrange"], winnersMove["color"])
+		inputList = conv64ListToNnInputList(winnersMove["arrange"], winnersMove["color"])
 		inputInt = dbmanager.encodeArrangement(inputList)
 		firstHalf, lastHalf = divmod(inputInt, int(1E16))
 		outIndex = winnersMove["row"] * 8 + winnersMove["col"]
 		bestMove = BestMove.BestMove(first_half_arrangement=firstHalf, last_half_arrangement=lastHalf,
 		                             move_index=outIndex)
-		#print(inputList)
-		#print(firstHalf)
-		#print(lastHalf)
-		#print(outIndex)
 		bestMove.save()
 
-
-		#fileNo = lastFileNo + i
-		#fileNameInput = os.path.join(os.path.dirname(__file__), os.pardir) + "/nncore/winnersData/input_{0:08d}".format(
-		#	fileNo + 1)
-		#fileNameOutput = os.path.join(os.path.dirname(__file__), os.pardir) + "/nncore/winnersData/output_{0:08d}".format(fileNo + 1)
-		#fIn = open(fileNameInput + '.csv', 'w')
-		#fOut = open(fileNameOutput + '.csv', 'w')
-
-		#moveList = tmpGame.returnMoveList(winnersMove["row"], winnersMove["col"])
-
-		#dataWriterIn = csv.writer(fIn)
-		#dataWriterIn.writerow(game.Game.returnNnInputStoreList(inputList))
-		#fIn.close()
-		#dataWriterOut = csv.writer(fOut)
-		#dataWriterOut.writerow(moveList)
-		#fOut.close()
 	return True
 
 
