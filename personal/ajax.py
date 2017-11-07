@@ -22,6 +22,7 @@ COLS = 8
 
 mainGame = game.Game(ROWS, COLS)
 
+
 def nextMove(request):
 	if request.is_ajax() and request.method == 'POST':
 		arrange = request.POST.get('arrange')
