@@ -1,41 +1,5 @@
-"""memo for database schema
-create table best_moves(
-	id integer primary key AUTOINCREMENT NOT NULL,
-	first_half_arrangement int NOT NULL,
-	last_half_arrangement int NOT NULL,
-	move_index int NOT NULL,
-	created_at DATETIME NOT NULL DEFAULT current_timestamp,
-	updated_at timestamp NOT NULL DEFAULT current_timestamp,
-	UNIQUE(first_half_arrangement, last_half_arrangement)
-);
-"""
-
-import sqlite3
-import sys, os
-sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir))
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/Model')
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/nncore')
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/utils')
-import BestMove
-import move_loader
-import basicFunc
 import numpy as np
-
-
-def migrateFromText():
-	print("getting last file number...")
-	maxFileNo = basicFunc.getLastFileNo()
-	print("getting whole data...")
-	i = 0
-	for inputs, outputs in move_loader.get_data_by_list(range(maxFileNo)):
-		print(i)
-		i += 1
-		inputInt = encodeArrangement(inputs)
-		firstHalf, lastHalf = divmod(inputInt, int(1E16))
-		outIndex = np.argmax(outputs)
-		outIndex = int(outIndex)
-		bestMove = BestMove.BestMove(first_half_arrangement = firstHalf, last_half_arrangement = lastHalf, move_index = outIndex)
-		bestMove.save()
+from personal.models import BestMove
 
 
 def getFirstAndLastHalf(arrangeInt):
@@ -74,7 +38,7 @@ def conv64ListToNNInputListForCalc(arrange64List):
 
 
 def convLeftRightSymm(arrange64):
-	arrange8x8 = np.array(arrange64).reshape(8,8)
+	arrange8x8 = np.array(arrange64).reshape(8, 8)
 	for row in range(8):
 		for col in range(4):
 			arrange8x8[row][col], arrange8x8[row][7-col] = arrange8x8[row][7-col], arrange8x8[row][col]
@@ -97,18 +61,19 @@ def convLeftRightSymmIntMove(moveInt):
 	try:
 		move64 = [0 for x in range(64)]
 		move64[moveInt] = 1
+		symmMove64 = convUpDownSymm(move64)
+		npMoveArray = np.array(symmMove64)
+		convertedMoveInt = np.argmax(npMoveArray)
+		if not convertedMoveInt >= 0 or not convertedMoveInt < 64:
+			print(
+				"LeftRight converting error. MoveInt is {0}, convertedMoveInt is {1}".format(moveInt, convertedMoveInt))
 	except:
 		print("LeftRight converting error! MoveInt is {0}".format(moveInt))
-	symmMove64 = convUpDownSymm(move64)
-	npMoveArray = np.array(symmMove64)
-	convertedMoveInt = np.argmax(npMoveArray)
-	if not convertedMoveInt>=0 or not convertedMoveInt<64:
-		print("LeftRight converting error. MoveInt is {0}, convertedMoveInt is {1}".format(moveInt, convertedMoveInt))
 	return convertedMoveInt
 
 
 def convUpDownSymm(arrange64):
-	arrange8x8 = np.array(arrange64).reshape(8,8)
+	arrange8x8 = np.array(arrange64).reshape(8, 8)
 	for col in range(8):
 		for row in range(4):
 			arrange8x8[row][col], arrange8x8[7-row][col] = arrange8x8[7-row][col], arrange8x8[row][col]
@@ -128,15 +93,12 @@ def convUpDownSymmInt(arrangeInt):
 
 
 def convUpDownSymmIntMove(moveInt):
-	try:
-		move64 = [0 for x in range(64)]
-		move64[moveInt] = 1
-	except:
-		print("UpDown converting error! MoveInt is {0}".format(moveInt))
+	move64 = [0 for x in range(64)]
+	move64[moveInt] = 1
 	symmMove64 = convUpDownSymm(move64)
 	npMoveArray = np.array(symmMove64)
 	convertedMoveInt = np.argmax(npMoveArray)
-	if not convertedMoveInt>=0 or not convertedMoveInt<64:
+	if not convertedMoveInt >= 0 or not convertedMoveInt < 64:
 		print("UpDown converting error. MoveInt is {0}, convertedMoveInt is {1}".format(moveInt, convertedMoveInt))
 	return convertedMoveInt
 
@@ -145,8 +107,8 @@ def encodeArrangement(arrangeList):
 	arrangeInt = 0
 	np_inputs = np.array(arrangeList).reshape((-1, 3))
 	for a, b, c in np_inputs:
-		input = int(a * 2 + b * 1 + c * 0)
-		arrangeInt = arrangeInt * 3 + input
+		input_data = int(a * 2 + b * 1 + c * 0)
+		arrangeInt = arrangeInt * 3 + input_data
 	return arrangeInt
 
 
@@ -175,7 +137,8 @@ def decodeMove(moveIndex):
 
 
 def get_data_by_list(n_list):
-	bestMoveList = BestMove.BestMove.retrieveAll()
+	# bestMoveList = BestMove.BestMove.retrieveAll()
+	bestMoveList = BestMove.objects.all()
 	tmparrangementList = []
 	tmpmoveList = []
 	for bestMove in bestMoveList:
@@ -192,40 +155,35 @@ def get_data_by_list(n_list):
 
 
 def replicateMoveData():
-	bestMoveList = BestMove.BestMove.retrieveAll()
+	# bestMoveList = BestMove.BestMove.retrieveAll()
+	bestMoveList = BestMove.objects.all()
 	for bestMove in bestMoveList:
 		arrangeInt = getWholeArrangeInt(bestMove.first_half_arrangement, bestMove.last_half_arrangement)
 
-		# Left Right Symmetory Data
+		# Left Right Symmetry Data
 		symmArrangeInt = convLeftRightSymmInt(arrangeInt)
 		firstInt, lastInt = getFirstAndLastHalf(symmArrangeInt)
 		moveInt = int(convLeftRightSymmIntMove(bestMove.move_index))
 		if not moveInt < 64:
 			print(firstInt, lastInt, bestMove.move_index, moveInt)
 			exit()
-		newBestMove = BestMove.BestMove(first_half_arrangement=firstInt, last_half_arrangement=lastInt,
-										move_index=moveInt)
+		save_or_update(firstInt, lastInt, moveInt)
 
-		if BestMove.BestMove.retrieveFromArrange(firstInt, lastInt) == None:
-			newBestMove.save()
-			#print("Is inserted.")
-		else:
-			newBestMove.update()
-			#print("Already exists.")
-
-		# Up Down Symmetory Data
+		# Up Down Symmetry Data
 		symmArrangeInt = convUpDownSymmInt(arrangeInt)
 		firstInt, lastInt = getFirstAndLastHalf(symmArrangeInt)
 		moveInt = int(convUpDownSymmIntMove(bestMove.move_index))
 		if not moveInt < 64:
 			print(firstInt, lastInt, bestMove.move_index, moveInt)
 			exit()
-		newBestMove = BestMove.BestMove(first_half_arrangement=firstInt, last_half_arrangement=lastInt,
-										move_index=moveInt)
-		if BestMove.BestMove.retrieveFromArrange(firstInt, lastInt) == None:
-			newBestMove.save()
-			#print("Is inserted.")
-		else:
-			newBestMove.update()
-			#print("Already exists.")
+		save_or_update(firstInt, lastInt, moveInt)
 
+
+def save_or_update(firstInt, lastInt, moveInt):
+	bestMoveInDb = BestMove.objects.filter(first_half_arrangement=firstInt).filter(last_half_arrangement=lastInt)
+	if bestMoveInDb.count() == 0:
+		newBestMove = BestMove(first_half_arrangement=firstInt, last_half_arrangement=lastInt, move_index=moveInt)
+		newBestMove.save()
+	else:
+		bestMoveInDb.move_index = moveInt
+		bestMoveInDb.save()

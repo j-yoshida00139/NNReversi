@@ -1,4 +1,4 @@
-from layer import *
+from personal.nncore.layer import *
 import numpy as np
 import pickle
 import math, os

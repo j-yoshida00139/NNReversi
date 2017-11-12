@@ -1,39 +1,36 @@
+from personal.nncore import network
+from personal.utils import basicFunc
+from personal.utils import mathFunc
+from personal import storeBestMove
 import math
-import sys, os
+import os
 import csv
-from os import listdir
-from os.path import isfile, join
 import numpy as np
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/nncore')
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/utils')
-#import network2_edit
-import network
-import basicFunc, mathFunc
-import storeBestMove
 
-n_input = 192 #366
-n_neutral_neuron = 100
-n_output = 64 #12
-size = [n_input, n_neutral_neuron, n_output]
+# n_input = 192  # 366
+# n_neutral_neuron = 100
+# n_output = 64  # 12
+# size = [n_input, n_neutral_neuron, n_output]
 
 directions = [
-	{"row": 0, "col": 1},
-	{"row":-1, "col": 1},
-	{"row":-1, "col": 0},
-	{"row":-1, "col":-1},
-	{"row": 0, "col":-1},
-	{"row": 1, "col":-1},
-	{"row": 1, "col": 0},
-	{"row": 1, "col": 1}
+	{"row":  0, "col":  1},
+	{"row": -1, "col":  1},
+	{"row": -1, "col":  0},
+	{"row": -1, "col": -1},
+	{"row":  0, "col": -1},
+	{"row":  1, "col": -1},
+	{"row":  1, "col":  0},
+	{"row":  1, "col":  1}
 ]
 
 net = network.Network()
+
 
 class Game(object):
 	def __init__(self, rows, cols, arrangeList=[], nextColor=0):
 		self.rows = rows
 		self.cols = cols
-		self.NONE  = 0
+		self.NONE = 0
 		self.BLACK = 1
 		self.WHITE = 2
 		self.arrange = arrangeList
@@ -41,15 +38,14 @@ class Game(object):
 		self.whiteMove = []
 		self.nextColor = self.BLACK if nextColor == 0 else nextColor
 		self.net = net
-		#self.net = network2_edit.Network(size)
 
 	def initialize(self):
-		upRow   = math.floor((self.rows-1)/2)
+		upRow = math.floor((self.rows-1)/2)
 		leftCol = math.floor((self.cols-1)/2)
 		self.arrange = [[0 for col in range(0, self.cols)] for row in range(0, self.rows)]
-		self.putPiece(upRow  , leftCol  , self.BLACK)
-		self.putPiece(upRow+1, leftCol  , self.WHITE)
-		self.putPiece(upRow  , leftCol+1, self.WHITE)
+		self.putPiece(upRow,   leftCol,   self.BLACK)
+		self.putPiece(upRow+1, leftCol,   self.WHITE)
+		self.putPiece(upRow,   leftCol+1, self.WHITE)
 		self.putPiece(upRow+1, leftCol+1, self.BLACK)
 
 	def clearPiece(self, row, col):
@@ -59,21 +55,21 @@ class Game(object):
 		self.arrange[row][col] = color
 
 	def canPutPiece(self, row, col, color):
-		if self.arrange[row][col]!=self.NONE:
+		if self.arrange[row][col] != self.NONE:
 			return False
-		if len(self.getTurnPieceList(row, col, color))>0:
+		if len(self.getTurnPieceList(row, col, color)) > 0:
 			return True
 		return False
 
 	def storeMove(self, row, col, color):
 		tmpArrangeList = basicFunc.unsharedCopy(self.arrange)
-		if color==self.BLACK :
-			self.blackMove.append({"arrange":tmpArrangeList, "color":color, "row":row, "col":col})
+		if color == self.BLACK:
+			self.blackMove.append({"arrange": tmpArrangeList, "color": color, "row": row, "col": col})
 		else:
-			self.whiteMove.append({"arrange":tmpArrangeList, "color":color, "row":row, "col":col})
+			self.whiteMove.append({"arrange": tmpArrangeList, "color": color, "row": row, "col": col})
 
 	def isOutOfRange(self, row, col):
-		if row>=self.rows or col>=self.cols or row<0 or col<0:
+		if row >= self.rows or col >= self.cols or row < 0 or col < 0:
 			return True
 		else:
 			return False
@@ -82,8 +78,8 @@ class Game(object):
 		counter = 0
 		for row in range(0, self.rows):
 			for col in range(0, self.cols):
-				if self.arrange[row][col]==color:
-					counter+=1
+				if self.arrange[row][col] == color:
+					counter += 1
 		return counter
 
 	def getTurnPieceList(self, row, col, color):
@@ -91,7 +87,7 @@ class Game(object):
 		for i in range(0, len(directions)):
 			tmpTurnPieceList = self.getTurnPieceForDirect(row, col, color,  directions[i]['row'], directions[i]['col'])
 			for j in range(len(tmpTurnPieceList)):
-				turnPieceList.append({"row":tmpTurnPieceList[j]['row'], "col":tmpTurnPieceList[j]['col']})
+				turnPieceList.append({"row": tmpTurnPieceList[j]['row'], "col": tmpTurnPieceList[j]['col']})
 		return turnPieceList
 
 	def getTurnPieceForDirect(self, row, col, color, y, x):
@@ -99,7 +95,7 @@ class Game(object):
 		if self.isOutOfRange(checkRow, checkCol):
 			return []
 
-		if self.arrange[checkRow][checkCol]==color or self.arrange[checkRow][checkCol]==self.NONE:
+		if self.arrange[checkRow][checkCol] == color or self.arrange[checkRow][checkCol] == self.NONE:
 			return []
 
 		turnPieceList, turnRows, turnCols = [], [], []
@@ -109,11 +105,11 @@ class Game(object):
 		checkCol += x
 
 		while not(self.isOutOfRange(checkRow, checkCol)):
-			if self.arrange[checkRow][checkCol]==self.NONE:
+			if self.arrange[checkRow][checkCol] == self.NONE:
 				return []
-			elif self.arrange[checkRow][checkCol]==color:
+			elif self.arrange[checkRow][checkCol] == color:
 				for i in range(0, len(turnRows)):
-					turnPieceList.append({"row":turnRows[i], "col":turnCols[i]})
+					turnPieceList.append({"row": turnRows[i], "col": turnCols[i]})
 				return turnPieceList
 			turnRows.append(checkRow)
 			turnCols.append(checkCol)
@@ -124,7 +120,7 @@ class Game(object):
 	def canPutPieceOnBoard(self, color):
 		canPutList = self.getCanPutList(color)
 		for canPut in canPutList:
-			if canPut==1:
+			if canPut == 1:
 				return True
 		return False
 
@@ -145,7 +141,7 @@ class Game(object):
 			return self.whiteMove
 
 	def goNextTurn(self):
-		self.nextColor = self.WHITE if self.nextColor==self.BLACK else self.BLACK
+		self.nextColor = self.WHITE if self.nextColor == self.BLACK else self.BLACK
 		if self.canPutPieceOnBoard(self.nextColor):
 			return True
 		else:
@@ -195,7 +191,7 @@ class Game(object):
 		moveList = []
 		for y in range(0, self.rows):
 			for x in range(0, self.cols):
-				if y==row and x==col:
+				if y == row and x == col:
 					moveList.append(float(1))
 				else:
 					moveList.append(float(0))
@@ -230,8 +226,8 @@ class Game(object):
 		if nnFlag:
 			arrangeList = basicFunc.conv64ListToNnInputList(self.arrange, self.nextColor)
 			arrangeList = basicFunc.convInput(arrangeList)
-			move = self.net.feedforward(np.array(arrangeList)) #move[0][0:63]
-			#move = self.net.feedforward(np.array(arrangeList).T) #move[0][0:63]
+			move = self.net.feedforward(np.array(arrangeList))  # move[0][0:63]
+			# move = self.net.feedforward(np.array(arrangeList).T)  # move[0][0:63]
 			move = mathFunc.softmax(move)
 		else:
 			move = np.random.rand(1,64) #move[0][0:63]
@@ -255,7 +251,7 @@ class Game(object):
 			row, col = divmod(index, 8)
 			tmpGame.goNextWithManualMove(row, col)
 			tmpWinRatio = storeBestMove.calcWinRatio(tmpGame.arrange, tmpGame.nextColor, self.nextColor)
-			#print("    row:%d, col:%d, WinRatio:%f" % (row, col, tmpWinRatio))
+			# print("    row:%d, col:%d, WinRatio:%f" % (row, col, tmpWinRatio))
 			if tmpWinRatio >= winRatio:
 				bestRow, bestCol, winRatio = row, col, tmpWinRatio
 		return bestRow, bestCol, winRatio
