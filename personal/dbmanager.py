@@ -2,39 +2,12 @@ import numpy as np
 from personal.models import BestMove
 
 
-def getFirstAndLastHalf(arrangeInt):
-	firstHalf, lastHalf = divmod(arrangeInt, int(1E16))
-	return firstHalf, lastHalf
-
-
-def getWholeArrangeInt(firstInt, lastInt):
-	return firstInt * int(1E16) + lastInt
-
-
 def convNNInputListTo64List(arrangeList):
 	arrangeNpArray = np.array(arrangeList).reshape(-1, 3)
 	arrange64 = []
 	for a, b, c in arrangeNpArray:
 		arrange64.append(a * 2 + b * 1 + c * 0)
 	return arrange64
-
-
-def conv64ListToNNInputListForCalc(arrange64List):
-	arrangeList = []
-	for value in arrange64List:
-		if value == 2:
-			arrangeList.append(float(1))
-			arrangeList.append(float(0))
-			arrangeList.append(float(0))
-		elif value == 1:
-			arrangeList.append(float(0))
-			arrangeList.append(float(1))
-			arrangeList.append(float(0))
-		else:
-			arrangeList.append(float(0))
-			arrangeList.append(float(0))
-			arrangeList.append(float(1))
-	return arrangeList
 
 
 def convLeftRightSymm(arrange64):
@@ -47,7 +20,7 @@ def convLeftRightSymm(arrange64):
 
 
 def convLeftRightSymmInt(arrangeInt):
-	firstHalf, lastHalf = getFirstAndLastHalf(arrangeInt)
+	firstHalf, lastHalf = BestMove.getFirstAndLastHalf(arrangeInt)
 	arrangeList = decodeArrangement(firstHalf, lastHalf)
 	arrange64 = convNNInputListTo64List(arrangeList)
 	arrange64 = convLeftRightSymm(arrange64)
@@ -82,7 +55,7 @@ def convUpDownSymm(arrange64):
 
 
 def convUpDownSymmInt(arrangeInt):
-	firstHalf, lastHalf = getFirstAndLastHalf(arrangeInt)
+	firstHalf, lastHalf = BestMove.getFirstAndLastHalf(arrangeInt)
 	arrangeList = decodeArrangement(firstHalf, lastHalf)
 	arrange64 = convNNInputListTo64List(arrangeList)
 	arrange64 = convUpDownSymm(arrange64)
@@ -101,15 +74,6 @@ def convUpDownSymmIntMove(moveInt):
 	if not convertedMoveInt >= 0 or not convertedMoveInt < 64:
 		print("UpDown converting error. MoveInt is {0}, convertedMoveInt is {1}".format(moveInt, convertedMoveInt))
 	return convertedMoveInt
-
-
-def encodeArrangement(arrangeList):
-	arrangeInt = 0
-	np_inputs = np.array(arrangeList).reshape((-1, 3))
-	for a, b, c in np_inputs:
-		input_data = int(a * 2 + b * 1 + c * 0)
-		arrangeInt = arrangeInt * 3 + input_data
-	return arrangeInt
 
 
 def decodeArrangement(first_half, last_half):
@@ -158,11 +122,11 @@ def replicateMoveData():
 	# bestMoveList = BestMove.BestMove.retrieveAll()
 	bestMoveList = BestMove.objects.all()
 	for bestMove in bestMoveList:
-		arrangeInt = getWholeArrangeInt(bestMove.first_half_arrangement, bestMove.last_half_arrangement)
+		arrangeInt = BestMove.getWholeArrangeInt(bestMove.first_half_arrangement, bestMove.last_half_arrangement)
 
 		# Left Right Symmetry Data
 		symmArrangeInt = convLeftRightSymmInt(arrangeInt)
-		firstInt, lastInt = getFirstAndLastHalf(symmArrangeInt)
+		firstInt, lastInt = BestMove.getFirstAndLastHalf(symmArrangeInt)
 		moveInt = int(convLeftRightSymmIntMove(bestMove.move_index))
 		if not moveInt < 64:
 			print(firstInt, lastInt, bestMove.move_index, moveInt)
@@ -171,7 +135,7 @@ def replicateMoveData():
 
 		# Up Down Symmetry Data
 		symmArrangeInt = convUpDownSymmInt(arrangeInt)
-		firstInt, lastInt = getFirstAndLastHalf(symmArrangeInt)
+		firstInt, lastInt = BestMove.getFirstAndLastHalf(symmArrangeInt)
 		moveInt = int(convUpDownSymmIntMove(bestMove.move_index))
 		if not moveInt < 64:
 			print(firstInt, lastInt, bestMove.move_index, moveInt)

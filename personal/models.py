@@ -1,6 +1,4 @@
 from django.db import models
-# from personal.utils import basicFunc
-# from personal import dbmanager
 import numpy as np
 
 
@@ -15,13 +13,11 @@ class BestMove(models.Model):
 		unique_together = ('first_half_arrangement', 'last_half_arrangement')
 
 	@staticmethod
-	def hasMoveData(winnersMove):
-		inputList = BestMove.conv64ListToNnInputList(winnersMove["arrange"], winnersMove["color"])
-		inputInt = BestMove.encodeArrangement(inputList)
-		firstHalfInt, lastHalfInt = divmod(inputInt, int(1E16))
-		bestMove = BestMove.objects.filter(
-			first_half_arrangement=firstHalfInt).filter(last_half_arrangement=lastHalfInt).count()
-		if bestMove == 0:
+	def hasMoveData(arrange, color):
+		firstHalf, lastHalf = BestMove.convArrangeToDBInput(arrange, color)
+		countInDB = BestMove.objects.filter(
+			first_half_arrangement=firstHalf).filter(last_half_arrangement=lastHalf).count()
+		if countInDB == 0:
 			return False
 		else:
 			return True
@@ -54,8 +50,30 @@ class BestMove(models.Model):
 					arrangeList.append([float(1)])
 		return arrangeList
 
-	# @staticmethod
-	# def unsharedCopy(inList):
-	# 	if isinstance(inList, list):
-	# 		return list(map(unsharedCopy, inList))
-	# 	return inList
+	@staticmethod
+	def storeBestMove(winnersMove):
+		firstHalf, lastHalf = BestMove.convArrangeToDBInput(winnersMove["arrange"], winnersMove["color"])
+		outIndex = BestMove.convMoveIndexToDBInput(winnersMove["row"], winnersMove["col"])
+		bestMove = BestMove(first_half_arrangement=firstHalf, last_half_arrangement=lastHalf, move_index=outIndex)
+		bestMove.save()
+
+	@staticmethod
+	def convArrangeToDBInput(arrange, color):
+		inputList = BestMove.conv64ListToNnInputList(arrange, color)
+		inputInt = BestMove.encodeArrangement(inputList)
+		firstHalf, lastHalf = BestMove.getFirstAndLastHalf(inputInt)
+		return firstHalf, lastHalf
+
+	@staticmethod
+	def convMoveIndexToDBInput(row, col):
+		moveIndex = row * 8 + col
+		return moveIndex
+
+	@staticmethod
+	def getFirstAndLastHalf(arrangeInt):
+		firstHalf, lastHalf = divmod(arrangeInt, int(1E16))
+		return firstHalf, lastHalf
+
+	@staticmethod
+	def getWholeArrangeInt(firstInt, lastInt):
+		return firstInt * int(1E16) + lastInt

@@ -1,35 +1,5 @@
-# Basic functions
 import numpy as np
-from personal import dbmanager
-from personal.models import BestMove
-
-
-def conv64ListToNnInputList(rawArray, color):
-	arrangeList = []
-	for cols in rawArray:
-		for value in cols:
-			if value == 0:
-				arrangeList.append([float(1)])
-				arrangeList.append([float(0)])
-				arrangeList.append([float(0)])
-			elif value == color:
-				arrangeList.append([float(0)])
-				arrangeList.append([float(1)])
-				arrangeList.append([float(0)])
-			else:
-				arrangeList.append([float(0)])
-				arrangeList.append([float(0)])
-				arrangeList.append([float(1)])
-	return arrangeList
-
-
-def storeBestMove(winnersMove):
-	inputList = conv64ListToNnInputList(winnersMove["arrange"], winnersMove["color"])
-	inputInt = dbmanager.encodeArrangement(inputList)
-	firstHalf, lastHalf = divmod(inputInt, int(1E16))
-	outIndex = winnersMove["row"] * 8 + winnersMove["col"]
-	bestMove = BestMove(first_half_arrangement=firstHalf, last_half_arrangement=lastHalf, move_index=outIndex)
-	bestMove.save()
+from personal import game
 
 
 def unsharedCopy(inList):
@@ -45,12 +15,22 @@ def convInput(input_array):
 	input_array = input_tmp_array
 	input_nparray = np.array([])
 
-	# print(input_array)
 	tmp = np.array([])
 	tmp = np.append(tmp, np.array([input_array[x] for x in range(0, 192, 3)]).reshape(8, 8))
 	tmp = np.append(tmp, np.array([input_array[x] for x in range(1, 192, 3)]).reshape(8, 8))
 	tmp = np.append(tmp, np.array([input_array[x] for x in range(2, 192, 3)]).reshape(8, 8))
 	input_nparray = np.append(input_nparray, tmp)
 	input_nparray = input_nparray.reshape(1, 3, 8, 8)
-	# print(input_nparray)
 	return input_nparray
+
+
+def calcWinRatio(arrangeList, nextColor, yourColor):
+	numGame, win, games = 100, 0, 0
+	for i in range(numGame):
+		tmpGame = game.Game(8, 8, unsharedCopy(arrangeList), nextColor)
+		while not tmpGame.isEnded():
+			tmpGame.goNextWithAutoMove()
+		games += 1 if not tmpGame.getWinnersColor() == 0 else 0 # Not even score
+		win += 1 if tmpGame.getWinnersColor() == yourColor else 0
+	winRatio = win / games * 100.0 if games != 0 else 0.0
+	return winRatio

@@ -6,6 +6,8 @@ Handler method to learn based on Neural Network learning process
 from personal.nncore import move_loader
 from personal.nncore import network
 from personal.utils.trainer import Trainer
+from personal.models import BestMove
+import math
 
 
 class NNHandler(object):
@@ -18,21 +20,15 @@ class NNHandler(object):
 
 	@staticmethod
 	def learn():
-		maxFileNo = 32000
-
 		n_epoch = 1
-		n_batch_size = 100
-		# n_batch_size = math.floor(maxFileNo/200)*200
+		n_batch_size = math.floor(BestMove.objects.all().count() / 200) * 100
 		print("batch size is :")
 		print(n_batch_size)
-		# coe_learn = 0.1
-		# lmbda = 0.0
-		# lmbda = 0.001
 		print("started")
 
 		for x in range(n_epoch):
 			print("cycle number : {0:03d}".format(x+1))
-			x_train, t_train, x_eva, t_eva, x_test, t_test = move_loader.load_data(maxFileNo, flatten=False)
+			x_train, t_train, x_eva, t_eva, x_test, t_test = move_loader.load_data(n_batch_size, flatten=False)
 
 			net = network.Network()
 			trainer = Trainer(

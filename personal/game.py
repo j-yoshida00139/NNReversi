@@ -1,7 +1,7 @@
 from personal.nncore import network
 from personal.utils import basicFunc
 from personal.utils import mathFunc
-from personal import storeBestMove
+from personal.models import BestMove
 import math
 import numpy as np
 
@@ -190,7 +190,7 @@ class Game(object):
 
 	def goNextWithAutoMove(self, nnFlag=False):
 		if nnFlag:
-			arrangeList = basicFunc.conv64ListToNnInputList(self.arrange, self.nextColor)
+			arrangeList = BestMove.conv64ListToNnInputList(self.arrange, self.nextColor)
 			arrangeList = basicFunc.convInput(arrangeList)
 			move = self.net.feedforward(np.array(arrangeList))  # move[0][0:63]
 			# move = self.net.feedforward(np.array(arrangeList).T)  # move[0][0:63]
@@ -216,7 +216,8 @@ class Game(object):
 			tmpGame = Game(8, 8, basicFunc.unsharedCopy(self.arrange), self.nextColor)
 			row, col = divmod(index, 8)
 			tmpGame.goNextWithManualMove(row, col)
-			tmpWinRatio = storeBestMove.calcWinRatio(tmpGame.arrange, tmpGame.nextColor, self.nextColor)
+			tmpWinRatio = basicFunc.calcWinRatio(tmpGame.arrange, tmpGame.nextColor, self.nextColor)
+			# tmpWinRatio = storeBestMove.calcWinRatio(tmpGame.arrange, tmpGame.nextColor, self.nextColor)
 			# print("    row:%d, col:%d, WinRatio:%f" % (row, col, tmpWinRatio))
 			if tmpWinRatio >= winRatio:
 				bestRow, bestCol, winRatio = row, col, tmpWinRatio
