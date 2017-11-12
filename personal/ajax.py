@@ -1,25 +1,17 @@
-import sys, os
-#from os import listdir
-#from os.path import isfile, join
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/nncore')
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/utils')
 import json
 from django.http import Http404, HttpResponse
-import network
-#import network2_edit
-import csv
+from personal.nncore import network
 import numpy as np
-import game
-import basicFunc, mathFunc
+from personal import game
+from personal.utils import basicFunc, mathFunc
+from personal.models import BestMove
 
-n_input = 192 #366
+n_input = 192
 n_neutral_neuron = 100
-n_output = 64 #12
+n_output = 64
 NONE = 0
 ROWS = 8
 COLS = 8
-
 mainGame = game.Game(ROWS, COLS)
 
 
@@ -48,7 +40,7 @@ def nextMove(request):
 		index = outputList.index(max(outputList))
 		row, col = divmod(index, 8)
 
-		cellJson = json.dumps({"row": row,"col": col})
+		cellJson = json.dumps({"row": row, "col": col})
 
 		return HttpResponse(cellJson, content_type='application/json')
 	else:
@@ -59,30 +51,12 @@ def storeWinnersData(request):
 	if request.is_ajax() and request.method == 'POST':
 		winnersData = request.POST.get('winnersData')
 		winnersDataArray = json.loads(winnersData)
-		print (winnersDataArray)
-		lastFileNo = basicFunc.getLastFileNo()
+		print(winnersDataArray)
 
-		for i in range(len(winnersDataArray)):
-			winnersMove = winnersDataArray[i]
-			inputList = basicFunc.conv64ListToNnInputList(winnersMove["arrange"], winnersMove["color"])
-			fileNo = lastFileNo + i
-			fileNameInput  = os.path.dirname(os.path.abspath(__file__)) + "/nncore/winnersData/input_{0:08d}".format(fileNo+1)
-			fileNameOutput = os.path.dirname(os.path.abspath(__file__)) + "/nncore/winnersData/output_{0:08d}".format(fileNo+1)
-			fIn  = open(fileNameInput  + '.csv', 'w')
-			fOut = open(fileNameOutput + '.csv', 'w')
-
-			row = winnersMove["row"]
-			col = winnersMove["col"]
-			moveList = mainGame.returnMoveList(row, col)
-
-			dataWriterIn = csv.writer(fIn)
-			dataWriterIn.writerow(mainGame.returnNnInputStoreList(inputList))
-			fIn.close()
-			dataWriterOut = csv.writer(fOut)
-			dataWriterOut.writerow(moveList)
-			fOut.close()
+		for winnersData in winnersDataArray:
+			if not BestMove.hasMoveData(winnersData):
+				basicFunc.storeBestMove(winnersData)
 
 		return HttpResponse(winnersDataArray, content_type='application/json')
 	else:
 		raise Http404
-

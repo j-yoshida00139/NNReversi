@@ -1,9 +1,9 @@
-import sys, os
-import game
-import numpy as np
+import sys\
+	,os
+from personal import game
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/nncore')
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/utils')
-import basicFunc
+from personal.utils import basicFunc
 
 
 def calcWinRatio(arrangeList, nextColor, yourColor):

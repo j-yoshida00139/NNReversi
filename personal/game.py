@@ -3,14 +3,7 @@ from personal.utils import basicFunc
 from personal.utils import mathFunc
 from personal import storeBestMove
 import math
-import os
-import csv
 import numpy as np
-
-# n_input = 192  # 366
-# n_neutral_neuron = 100
-# n_output = 64  # 12
-# size = [n_input, n_neutral_neuron, n_output]
 
 directions = [
 	{"row":  0, "col":  1},
@@ -154,33 +147,6 @@ class Game(object):
 	def turnPiece(self, turnPieceList, color):
 		for i in range(0, len(turnPieceList)):
 			self.putPiece(turnPieceList[i]["row"], turnPieceList[i]["col"], color)
-
-	def storeWinnersData(self, winnersData):
-		lastFileNo = self.getLastFileNo()
-
-		for i in range(len(winnersData)):
-			winnersMove = winnersData[i]
-			inputList = basicFunc.conv64ListToNnInputList(winnersMove["arrange"], winnersMove["color"])
-			fileNo = lastFileNo + i
-			fileNameInput = os.path.dirname(os.path.abspath(__file__)) + "/nncore/winnersData/input_{0:08d}".format(
-				fileNo + 1)
-			fileNameOutput = os.path.dirname(
-				os.path.abspath(__file__)) + "/nncore/winnersData/output_{0:08d}".format(fileNo + 1)
-			fIn = open(fileNameInput + '.csv', 'w')
-			fOut = open(fileNameOutput + '.csv', 'w')
-
-			row = winnersMove["row"]
-			col = winnersMove["col"]
-			moveList = Game.returnMoveList(row, col)
-
-			dataWriterIn = csv.writer(fIn)
-			dataWriterIn.writerow(Game.returnNnInputStoreList(inputList))
-			fIn.close()
-			dataWriterOut = csv.writer(fOut)
-			dataWriterOut.writerow(moveList)
-			fOut.close()
-
-		return True
 
 	def returnMoveList(self, row, col):
 		u"""Return array which has next move's row and column. (for neural network)

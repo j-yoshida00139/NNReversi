@@ -1,33 +1,7 @@
 # Basic functions
-import sys
-import os
 import numpy as np
-from os import listdir
-from os.path import isfile,\
-	join
 from personal import dbmanager
 from personal.models import BestMove
-
-sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir))
-sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir) + '/nncore')
-sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir) + '/Model')
-#import dbmanager
-
-
-def getLastFileNo():
-	path = os.path.join(os.path.dirname(__file__), os.pardir) + "/nncore/winnersData/"
-	fileNoList = [retrieveFileNo(f) for f in listdir(path) if isfile(join(path, f))]
-	return np.max(fileNoList)
-
-
-def retrieveFileNo(filename):
-	if filename.count(".csv"):
-		tmpFileName = filename.replace("input_", "")
-		tmpFileName = tmpFileName.replace("output_", "")
-		tmpFileName = tmpFileName.replace(".csv", "")
-		return int(tmpFileName)
-	else:
-		return 0
 
 
 def conv64ListToNnInputList(rawArray, color):
@@ -47,12 +21,6 @@ def conv64ListToNnInputList(rawArray, color):
 				arrangeList.append([float(0)])
 				arrangeList.append([float(1)])
 	return arrangeList
-
-
-def storeWinnersDataList(winnersData):
-	for i, winnersMove in list(enumerate(winnersData)):
-		storeBestMove(winnersMove)
-	return True
 
 
 def storeBestMove(winnersMove):

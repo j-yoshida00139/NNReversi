@@ -54,10 +54,11 @@ Game.prototype.canPutPiece = function(row, col, color){
 }
 
 Game.prototype.storeMove = function(row, col, color){
+    var currentArrange = unsharedCopy(this.arrange)
     if(color===this.BLACK){
-        this.blackMove.push({arrange:this.arrange, row:row, col:col, color:color});
+        this.blackMove.push({arrange:currentArrange, row:row, col:col, color:color});
     }else{
-        this.whiteMove.push({arrange:this.arrange, row:row, col:col, color:color});
+        this.whiteMove.push({arrange:currentArrange, row:row, col:col, color:color});
     }
 }
 
@@ -158,4 +159,12 @@ Game.prototype.getWinnersData = function(){
         return this.whiteMove;
     }
 
+}
+
+function unsharedCopy(inList){
+    returnList = [];
+    inList.forEach(function(value){
+        returnList.push(value.slice());
+    });
+    return returnList;
 }

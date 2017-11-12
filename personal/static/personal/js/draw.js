@@ -76,7 +76,7 @@ function goNextTurn(context){
     // Case that both users could not put any pieces
     window.alert("終わり!");
     var winnersData = game.getWinnersData();
-    //sendWinnersData(winnersData);
+    sendWinnersData(winnersData);
 }
 
 function turnPiece(context, turnPieceList, color){
@@ -136,7 +136,7 @@ function moveByNN(context) {
                 goNextTurn(context);
                 counter++;
                 $('#counter').html(counter);
-            }, 1000);
+            }, 300);
         }
     });
 }
@@ -151,20 +151,6 @@ function sendWinnersData(winnersData) {
             "winnersData"     : winnersDataJson
         },
         success: function(data) {
-            // setTimeout (function () {
-            //     row = data["row"];
-            //     col = data["col"];
-            //     game.storeMove(row, col, game.nextColor);
-            //     putPiece(context, row, col, game.nextColor);
-            //     turnPieceList = game.getTurnPieceList(row, col, game.nextColor);
-            //     turnPiece(context, turnPieceList, game.nextColor);
-            //     $('#countBlack').html(game.getScore(game.BLACK));
-            //     $('#countWhite').html(game.getScore(game.WHITE));
-            //     goNextTurn(context);
-            //     counter++;
-            //     $('#counter').html(counter);
-            // }, 1000);
         }
     });
 }
-
