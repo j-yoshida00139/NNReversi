@@ -101,7 +101,6 @@ def decodeMove(moveIndex):
 
 
 def get_data_by_list(n_list):
-	# bestMoveList = BestMove.BestMove.retrieveAll()
 	bestMoveList = BestMove.objects.all()
 	tmparrangementList = []
 	tmpmoveList = []
