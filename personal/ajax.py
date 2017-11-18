@@ -23,7 +23,7 @@ def nextMove(request):
 
 		arrangeArray = json.loads(arrange)
 		canPutList = json.loads(canPut)
-		arrangeList = BestMove.conv64ListToNnInputList(arrangeArray, colorInt)
+		arrangeList = BestMove.encodeToNNArrange(arrangeArray, colorInt)
 		arrangeList = basicFunc.convInput(arrangeList)
 
 		net = network.Network()

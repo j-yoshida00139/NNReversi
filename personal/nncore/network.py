@@ -1,17 +1,22 @@
 from personal.nncore.layer import *
 import numpy as np
 import pickle
-import math, os
+import math
+import os
+
 
 class Network(object):
-	def __init__(self, input_dim=(3, 8, 8),
-				convParams = ({'filter_num':16, 'filter_size':4, 'pad':2, 'stride':1},
-								{'filter_num':16, 'filter_size':4, 'pad':2, 'stride':1},
-								{'filter_num':32, 'filter_size':4, 'pad':2, 'stride':1},
-								{'filter_num':32, 'filter_size':4, 'pad':2, 'stride':1},
-								{'filter_num':64, 'filter_size':4, 'pad':2, 'stride':1},
-								{'filter_num':64, 'filter_size':2, 'pad':1, 'stride':1}),
-				affineParams = (100, 64)):  #hidden_size=100, output_size=100
+	def __init__(
+			self,
+			input_dim=(3, 8, 8),
+			convParams=(
+					{'filter_num': 16, 'filter_size': 4, 'pad': 2, 'stride': 1},
+					{'filter_num': 16, 'filter_size': 4, 'pad': 2, 'stride': 1},
+					{'filter_num': 32, 'filter_size': 4, 'pad': 2, 'stride': 1},
+					{'filter_num': 32, 'filter_size': 4, 'pad': 2, 'stride': 1},
+					{'filter_num': 64, 'filter_size': 4, 'pad': 2, 'stride': 1},
+					{'filter_num': 64, 'filter_size': 2, 'pad': 1, 'stride': 1}),
+			affineParams=(100, 64)):  # hidden_size=100, output_size=100
 
 		# declare layers ===========
 		self.layers = []
@@ -42,7 +47,8 @@ class Network(object):
 		for layer in self.layers:
 			if isinstance(layer, Convolution):
 				convParam = next(conv_iter)
-				layer.setParams(self.params['W' + str(prmIdx + 1)], self.params['b' + str(prmIdx + 1)], convParam['stride'], convParam['pad'])
+				layer.setParams(
+					self.params['W' + str(prmIdx + 1)], self.params['b' + str(prmIdx + 1)], convParam['stride'], convParam['pad'])
 				prmIdx += 1
 			elif isinstance(layer, Pooling):
 				layer.setParams(pool_h=2, pool_w=2, stride=2)
@@ -63,8 +69,8 @@ class Network(object):
 		return self.last_layer.forward(y, t)
 
 	def accuracy(self, x, t, batch_size=100):
-		if t.ndim != 1 : t = np.argmax(t, axis=1)
-
+		if t.ndim != 1:
+			t = np.argmax(t, axis=1)
 		acc = 0.0
 
 		for i in range(int(x.shape[0] / batch_size)):

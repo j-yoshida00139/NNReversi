@@ -190,7 +190,7 @@ class Game(object):
 
 	def goNextWithAutoMove(self, nnFlag=False):
 		if nnFlag:
-			arrangeList = BestMove.conv64ListToNnInputList(self.arrange, self.nextColor)
+			arrangeList = BestMove.encodeToNNArrange(self.arrange, self.nextColor)
 			arrangeList = basicFunc.convInput(arrangeList)
 			move = self.net.feedforward(np.array(arrangeList))  # move[0][0:63]
 			# move = self.net.feedforward(np.array(arrangeList).T)  # move[0][0:63]

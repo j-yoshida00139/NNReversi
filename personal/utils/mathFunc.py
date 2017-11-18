@@ -29,3 +29,13 @@ def softmax(x):
 
 	x -= np.max(x)
 	return np.exp(x) / np.sum(np.exp(x))
+
+
+def base10ToNStr(x, n):
+	if int(x / n):
+		return base10ToNStr(int(x / n), n) + str(x % n)
+	return str(x % n)
+
+
+def base10ToN(x, n):
+	return int(base10ToNStr(x, n))

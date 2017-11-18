@@ -19,7 +19,8 @@ class Command(BaseCommand):
 			mainGame.initialize()
 			while not mainGame.isEnded():
 				if simulateFlg == 1:
-					if not BestMove.hasMoveData(mainGame.arrange, mainGame.nextColor):
+					gameArrange = BestMove.convToGameArrange(mainGame.arrange, mainGame.nextColor)
+					if not BestMove.hasMoveData(gameArrange):
 						bestRow, bestCol, winRatio = mainGame.findBestMove()
 						print("Best move is row:%d, col:%d, nextColor:%d, win ratio:%d %s" % (
 							bestRow, bestCol, mainGame.nextColor, winRatio, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))

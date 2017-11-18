@@ -13,8 +13,8 @@ class BestMove(models.Model):
 		unique_together = ('first_half_arrangement', 'last_half_arrangement')
 
 	@staticmethod
-	def hasMoveData(arrange, color):
-		firstHalf, lastHalf = BestMove.convArrangeToDBInput(arrange, color)
+	def hasMoveData(gameArrange):
+		firstHalf, lastHalf = BestMove.encodeToDBArrange(gameArrange)
 		countInDB = BestMove.objects.filter(
 			first_half_arrangement=firstHalf).filter(last_half_arrangement=lastHalf).count()
 		if countInDB == 0:
@@ -23,54 +23,54 @@ class BestMove(models.Model):
 			return True
 
 	@staticmethod
-	def encodeArrangement(arrangeList):
+	def encodeToDBArrange(gameArrange):
 		arrangeInt = 0
-		np_inputs = np.array(arrangeList).reshape((-1, 3))
-		for a, b, c in np_inputs:
-			input_data = int(a * 2 + b * 1 + c * 0)
-			arrangeInt = arrangeInt * 3 + input_data
-		return arrangeInt
+		for i in gameArrange:
+			arrangeInt = arrangeInt * 3 + i
+		firstInt, lastInt = BestMove.getFirstLastArrangeInt(arrangeInt)
+		return firstInt, lastInt
 
 	@staticmethod
-	def conv64ListToNnInputList(rawArray, color):
-		arrangeList = []
-		for cols in rawArray:
-			for value in cols:
-				if value == 0:
-					arrangeList.append([float(1)])
-					arrangeList.append([float(0)])
-					arrangeList.append([float(0)])
-				elif value == color:
-					arrangeList.append([float(0)])
-					arrangeList.append([float(1)])
-					arrangeList.append([float(0)])
+	def encodeToNNArrange(arrange2Dim, playerColor):
+		nnArrange = []
+		arrange1Dim = np.array(arrange2Dim).reshape(64).tolist()
+		for color in arrange1Dim:
+			if color == 0:
+				nnArrange.extend([[float(1)], [float(0)], [float(0)]])
+			elif color == playerColor:
+				nnArrange.extend([[float(0)], [float(1)], [float(0)]])
+			else:
+				nnArrange.extend([[float(0)], [float(0)], [float(1)]])
+		return nnArrange
+
+	@staticmethod
+	def convToGameArrange(colorArrange, playerColor):
+		gameArrange = []
+		for row_i, row in enumerate(colorArrange):
+			for col_i, col in enumerate(row):
+				if colorArrange[row_i][col_i] == 0:
+					gameArrange.append(2)
+				elif colorArrange[row_i][col_i] == playerColor:
+					gameArrange.append(1)
 				else:
-					arrangeList.append([float(0)])
-					arrangeList.append([float(0)])
-					arrangeList.append([float(1)])
-		return arrangeList
+					gameArrange.append(0)
+		return gameArrange
 
 	@staticmethod
 	def storeBestMove(winnersMove):
-		firstHalf, lastHalf = BestMove.convArrangeToDBInput(winnersMove["arrange"], winnersMove["color"])
-		outIndex = BestMove.convMoveIndexToDBInput(winnersMove["row"], winnersMove["col"])
+		gameArrange = BestMove.convToGameArrange(winnersMove["arrange"], winnersMove["color"])
+		firstHalf, lastHalf = BestMove.encodeToDBArrange(gameArrange)
+		outIndex = BestMove.encodeToDBMove(winnersMove["row"], winnersMove["col"])
 		bestMove = BestMove(first_half_arrangement=firstHalf, last_half_arrangement=lastHalf, move_index=outIndex)
 		bestMove.save()
 
 	@staticmethod
-	def convArrangeToDBInput(arrange, color):
-		inputList = BestMove.conv64ListToNnInputList(arrange, color)
-		inputInt = BestMove.encodeArrangement(inputList)
-		firstHalf, lastHalf = BestMove.getFirstAndLastHalf(inputInt)
-		return firstHalf, lastHalf
-
-	@staticmethod
-	def convMoveIndexToDBInput(row, col):
+	def encodeToDBMove(row, col):
 		moveIndex = row * 8 + col
 		return moveIndex
 
 	@staticmethod
-	def getFirstAndLastHalf(arrangeInt):
+	def getFirstLastArrangeInt(arrangeInt):
 		firstHalf, lastHalf = divmod(arrangeInt, int(1E16))
 		return firstHalf, lastHalf
 

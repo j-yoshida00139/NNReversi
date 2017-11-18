@@ -2,100 +2,68 @@ import numpy as np
 from personal.models import BestMove
 
 
-def convNNInputListTo64List(arrangeList):
-	arrangeNpArray = np.array(arrangeList).reshape(-1, 3)
-	arrange64 = []
-	for a, b, c in arrangeNpArray:
-		arrange64.append(a * 2 + b * 1 + c * 0)
-	return arrange64
-
-
-def convLeftRightSymm(arrange64):
-	arrange8x8 = np.array(arrange64).reshape(8, 8)
-	for row in range(8):
-		for col in range(4):
-			arrange8x8[row][col], arrange8x8[row][7-col] = arrange8x8[row][7-col], arrange8x8[row][col]
-	arrange64 = arrange8x8.reshape(64)
-	return arrange64
-
-
-def convLeftRightSymmInt(arrangeInt):
-	firstHalf, lastHalf = BestMove.getFirstAndLastHalf(arrangeInt)
-	arrangeList = decodeArrangement(firstHalf, lastHalf)
-	arrange64 = convNNInputListTo64List(arrangeList)
-	arrange64 = convLeftRightSymm(arrange64)
-	newArrangeInt = 0
-	for val in arrange64:
-		newArrangeInt = newArrangeInt * 3 + int(val)
-	return newArrangeInt
-
-
-def convLeftRightSymmIntMove(moveInt):
-	try:
-		move64 = [0 for x in range(64)]
-		move64[moveInt] = 1
-		symmMove64 = convUpDownSymm(move64)
-		npMoveArray = np.array(symmMove64)
-		convertedMoveInt = np.argmax(npMoveArray)
-		if not convertedMoveInt >= 0 or not convertedMoveInt < 64:
-			print(
-				"LeftRight converting error. MoveInt is {0}, convertedMoveInt is {1}".format(moveInt, convertedMoveInt))
-	except:
-		print("LeftRight converting error! MoveInt is {0}".format(moveInt))
-	return convertedMoveInt
-
-
-def convUpDownSymm(arrange64):
-	arrange8x8 = np.array(arrange64).reshape(8, 8)
-	for col in range(8):
-		for row in range(4):
-			arrange8x8[row][col], arrange8x8[7-row][col] = arrange8x8[7-row][col], arrange8x8[row][col]
-	arrange64 = arrange8x8.reshape(64)
-	return arrange64
-
-
-def convUpDownSymmInt(arrangeInt):
-	firstHalf, lastHalf = BestMove.getFirstAndLastHalf(arrangeInt)
-	arrangeList = decodeArrangement(firstHalf, lastHalf)
-	arrange64 = convNNInputListTo64List(arrangeList)
-	arrange64 = convUpDownSymm(arrange64)
-	newArrangeInt = 0
-	for val in arrange64:
-		newArrangeInt = newArrangeInt * 3 + int(val)
-	return newArrangeInt
-
-
-def convUpDownSymmIntMove(moveInt):
-	move64 = [0 for x in range(64)]
-	move64[moveInt] = 1
-	symmMove64 = convUpDownSymm(move64)
-	npMoveArray = np.array(symmMove64)
-	convertedMoveInt = np.argmax(npMoveArray)
-	if not convertedMoveInt >= 0 or not convertedMoveInt < 64:
-		print("UpDown converting error. MoveInt is {0}, convertedMoveInt is {1}".format(moveInt, convertedMoveInt))
-	return convertedMoveInt
-
-
-def decodeArrangement(first_half, last_half):
-	arrangement_int = first_half * int(1E16) + last_half
-	tmpArrangements = []
+def decodeDBArrange(firstInt, lastInt):
+	arrangeInt = BestMove.getWholeArrangeInt(firstInt, lastInt)
+	gameArrange = []
 	for i in range(64):
-		arrangement_int, tmp_a = divmod(arrangement_int, 3)
-		tmpArrangements.append(tmp_a)
-	tmpArrangements.reverse()
-	arrangements = []
-	for tmpArrangement in tmpArrangements:
-		if tmpArrangement == 2:
-			arrangements.extend([1.0, 0.0, 0.0])
-		elif tmpArrangement == 1:
-			arrangements.extend([0.0, 1.0, 0.0])
-		elif tmpArrangement == 0:
-			arrangements.extend([0.0, 0.0, 1.0])
-	return arrangements
+		arrangeInt, mod = divmod(arrangeInt, 3)
+		gameArrange.append(mod)
+	gameArrange.reverse()
+	return gameArrange
 
 
-def decodeMove(moveIndex):
-	moveList = [0.0 for x in range(64)]
+def flipTwoDimList(twoDimArrange, way):
+	if way == "Horizontal":
+		axis = 1
+	elif way == "Vertical":
+		axis = 0
+	else:
+		raise BaseException("2nd argument should be 'Horizontal' or 'Vertical'")
+	npArrange = np.array(twoDimArrange)
+	flipped = np.flip(npArrange, axis).tolist()
+	return flipped
+
+
+def flipArrangeInt(arrangeInt, way):
+	if not way == "Horizontal" and not way == "Vertical":
+		raise BaseException("2nd argument should be 'Horizontal' or 'Vertical'")
+	firstHalf, lastHalf = BestMove.getFirstLastArrangeInt(arrangeInt)
+	gameArrange = decodeDBArrange(firstHalf, lastHalf)
+	twoDimArrange = np.array(gameArrange).reshape(8, 8).tolist()
+	flippedArrange = np.array(flipTwoDimList(twoDimArrange, way)).reshape(64).tolist()
+	newArrangeInt = 0
+	for val in flippedArrange:
+		newArrangeInt = newArrangeInt * 3 + int(val)
+	return newArrangeInt
+
+
+def flipMoveInt(moveInt, way):
+	if not moveInt >= 0 or not moveInt < 64:
+		raise BaseException(
+			"Argument should be between 0 and 63, but it's {0}".format(moveInt))
+	if not way == "Horizontal" and not way == "Vertical":
+		raise BaseException("2nd argument should be 'Horizontal' or 'Vertical'")
+	twoDimMove = np.array(decodeDBMove(moveInt)).reshape(8, 8)
+	symmMove64 = flipTwoDimList(twoDimMove, way)
+	npMoveArray = np.array(symmMove64).reshape(64)
+	convertedMoveInt = np.argmax(npMoveArray)
+	return convertedMoveInt
+
+
+def encodeToNNArrange(gameArrange):
+	nnArrange = []
+	for pieceColor in gameArrange:
+		if pieceColor == 2:  # No piece
+			nnArrange.extend([1.0, 0.0, 0.0])
+		elif pieceColor == 1:  # Color of the player
+			nnArrange.extend([0.0, 1.0, 0.0])
+		elif pieceColor == 0:  # Color of opposite
+			nnArrange.extend([0.0, 0.0, 1.0])
+	return nnArrange
+
+
+def decodeDBMove(moveIndex):
+	moveList = [0.0] * 64
 	moveList[moveIndex] = 1.0
 	return moveList
 
@@ -105,8 +73,10 @@ def get_data_by_list(n_list):
 	tmparrangementList = []
 	tmpmoveList = []
 	for bestMove in bestMoveList:
-		tmparrangementList.append(decodeArrangement(bestMove.first_half_arrangement, bestMove.last_half_arrangement))
-		tmpmoveList.append(decodeMove(bestMove.move_index))
+		arrange64 = decodeDBArrange(bestMove.first_half_arrangement, bestMove.last_half_arrangement)
+		arrangeList = BestMove.encodeToNNArrange(arrange64, 1)
+		tmparrangementList.append(arrangeList)
+		tmpmoveList.append(decodeDBMove(bestMove.move_index))
 	arrangementList = []
 	moveList = []
 	for i in n_list:
@@ -118,27 +88,20 @@ def get_data_by_list(n_list):
 
 
 def replicateMoveData():
-	# bestMoveList = BestMove.BestMove.retrieveAll()
 	bestMoveList = BestMove.objects.all()
 	for bestMove in bestMoveList:
 		arrangeInt = BestMove.getWholeArrangeInt(bestMove.first_half_arrangement, bestMove.last_half_arrangement)
 
-		# Left Right Symmetry Data
-		symmArrangeInt = convLeftRightSymmInt(arrangeInt)
-		firstInt, lastInt = BestMove.getFirstAndLastHalf(symmArrangeInt)
-		moveInt = int(convLeftRightSymmIntMove(bestMove.move_index))
-		if not moveInt < 64:
-			print(firstInt, lastInt, bestMove.move_index, moveInt)
-			exit()
+		# Horizontal Symmetry Data
+		symmArrangeInt = flipArrangeInt(arrangeInt)
+		firstInt, lastInt = BestMove.getFirstLastArrangeInt(symmArrangeInt)
+		moveInt = int(flipMoveInt(bestMove.move_index, "Horizontal"))
 		save_or_update(firstInt, lastInt, moveInt)
 
-		# Up Down Symmetry Data
-		symmArrangeInt = convUpDownSymmInt(arrangeInt)
-		firstInt, lastInt = BestMove.getFirstAndLastHalf(symmArrangeInt)
-		moveInt = int(convUpDownSymmIntMove(bestMove.move_index))
-		if not moveInt < 64:
-			print(firstInt, lastInt, bestMove.move_index, moveInt)
-			exit()
+		# Vertical Symmetry Data
+		symmArrangeInt = flipArrangeInt(arrangeInt, "Vertical")
+		firstInt, lastInt = BestMove.getFirstLastArrangeInt(symmArrangeInt)
+		moveInt = int(flipMoveInt(bestMove.move_index, "Vertical"))
 		save_or_update(firstInt, lastInt, moveInt)
 
 
