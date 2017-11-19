@@ -50,66 +50,29 @@ def flipMoveInt(moveInt, way):
 	return convertedMoveInt
 
 
-def encodeToNNArrange(gameArrange):
-	nnArrange = []
-	for pieceColor in gameArrange:
-		if pieceColor == 2:  # No piece
-			nnArrange.extend([1.0, 0.0, 0.0])
-		elif pieceColor == 1:  # Color of the player
-			nnArrange.extend([0.0, 1.0, 0.0])
-		elif pieceColor == 0:  # Color of opposite
-			nnArrange.extend([0.0, 0.0, 1.0])
-	return nnArrange
-
-
 def decodeDBMove(moveIndex):
 	moveList = [0.0] * 64
 	moveList[moveIndex] = 1.0
 	return moveList
 
 
-def get_data_by_list(n_list):
-	bestMoveList = BestMove.objects.all()
-	tmparrangementList = []
-	tmpmoveList = []
-	for bestMove in bestMoveList:
-		arrange64 = decodeDBArrange(bestMove.first_half_arrangement, bestMove.last_half_arrangement)
-		arrangeList = BestMove.encodeToNNArrange(arrange64, 1)
-		tmparrangementList.append(arrangeList)
-		tmpmoveList.append(decodeDBMove(bestMove.move_index))
-	arrangementList = []
+def extractNNDataByIndices(n_list):
+	allBestMove = BestMove.objects.all()
+	bestMoveList = extractListByIndices(allBestMove, n_list)
+	arrangeList = []
 	moveList = []
-	for i in n_list:
-		arrangementList.append(tmparrangementList[i])
-		moveList.append(tmpmoveList[i])
-	arrangementList = np.array([np.reshape(x, (192)) for x in arrangementList])
-	moveList = np.array([np.reshape(x, (64)) for x in moveList])
-	return arrangementList, moveList
-
-
-def replicateMoveData():
-	bestMoveList = BestMove.objects.all()
 	for bestMove in bestMoveList:
-		arrangeInt = BestMove.getWholeArrangeInt(bestMove.first_half_arrangement, bestMove.last_half_arrangement)
-
-		# Horizontal Symmetry Data
-		symmArrangeInt = flipArrangeInt(arrangeInt)
-		firstInt, lastInt = BestMove.getFirstLastArrangeInt(symmArrangeInt)
-		moveInt = int(flipMoveInt(bestMove.move_index, "Horizontal"))
-		save_or_update(firstInt, lastInt, moveInt)
-
-		# Vertical Symmetry Data
-		symmArrangeInt = flipArrangeInt(arrangeInt, "Vertical")
-		firstInt, lastInt = BestMove.getFirstLastArrangeInt(symmArrangeInt)
-		moveInt = int(flipMoveInt(bestMove.move_index, "Vertical"))
-		save_or_update(firstInt, lastInt, moveInt)
+		gameArrange = decodeDBArrange(bestMove.first_half_arrangement, bestMove.last_half_arrangement)
+		nnArrange = BestMove.encodeToNNArrange(gameArrange, 1)
+		arrangeList.append(nnArrange)
+		moveList.append(decodeDBMove(bestMove.move_index))
+	npArrangeList = np.array([np.reshape(x, 192) for x in arrangeList])
+	npMoveList = np.array([np.reshape(x, 64) for x in moveList])
+	return npArrangeList, npMoveList
 
 
-def save_or_update(firstInt, lastInt, moveInt):
-	bestMoveInDb = BestMove.objects.filter(first_half_arrangement=firstInt).filter(last_half_arrangement=lastInt)
-	if bestMoveInDb.count() == 0:
-		newBestMove = BestMove(first_half_arrangement=firstInt, last_half_arrangement=lastInt, move_index=moveInt)
-		newBestMove.save()
-	else:
-		bestMoveInDb.move_index = moveInt
-		bestMoveInDb.save()
+def extractListByIndices(targetList, nList):
+	extractedList = []
+	for i in nList:
+		extractedList.append(targetList[i])
+	return extractedList

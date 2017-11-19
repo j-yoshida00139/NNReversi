@@ -40,6 +40,7 @@ class Network(object):
 		if os.path.exists("params.pkl"):
 			self.load_params()
 		else:
+			raise BaseException("No params.pkl")
 			self.initParams(input_dim, convParams, affineParams)
 
 		prmIdx = 0
@@ -146,7 +147,6 @@ class Network(object):
 
 			prmIdx = prmIdx + 1 if not(isinstance(layer, Pooling)) else prmIdx
 
-
 	def save_params(self, file_name="params.pkl"):
 		params = {}
 		for key, val in self.params.items():
@@ -167,4 +167,3 @@ class Network(object):
 				layer.W = self.params['W' + str(idx + 1)]
 				layer.b = self.params['b' + str(idx + 1)]
 				idx += 1
-

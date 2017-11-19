@@ -5,7 +5,7 @@ from personal.models import BestMove
 from personal.utils import basicFunc
 
 # numGames = 500
-numGames = 1
+numGames = 10
 
 
 class Command(BaseCommand):

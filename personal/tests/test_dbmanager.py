@@ -1,6 +1,8 @@
 import pytest
 from personal.dbmanager import *
 
+pytestmark = pytest.mark.django_db
+
 
 def test_decodeDBArrange():
 	firstInt = 66032381159471
@@ -33,6 +35,8 @@ def test_flipArrangeInt():
 	assert flipArrangeInt(arrangeInt, "Horizontal") == flippedIntHor
 	flippedIntVer = 2509029184243533849258951963655
 	assert flipArrangeInt(arrangeInt, "Vertical") == flippedIntVer
+	with pytest.raises(BaseException):
+		flipArrangeInt(arrangeInt, "Other")
 
 
 def test_flipMoveInt():
@@ -50,3 +54,34 @@ def test_flipMoveInt():
 		flipMoveInt(1, "Other")
 	with pytest.raises(BaseException):
 		flipMoveInt(64, "Other")
+
+
+def test_extractListByIndices():
+	nList = [1, 3, 6]
+	targetList = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+	extractedList = extractListByIndices(targetList, nList)
+	assert extractedList == ['b', 'd', 'g']
+
+
+# def test_extractNNDataByIndices():
+# 	BestMove(first_half_arrangement=66032381159471, last_half_arrangement=3939357278671015, move_index=0).save()
+# 	BestMove(first_half_arrangement=145243061361801, last_half_arrangement=1145185326950141, move_index=1).save()
+# 	BestMove(first_half_arrangement=250902918424353, last_half_arrangement=3849258951963655, move_index=2).save()
+# 	nList = [2, 1, 0]
+# 	npArrangeList, npMoveList = extractNNDataByIndices(nList)
+# 	correctNNArrange = BestMove.encodeToNNArrange([
+# 		0, 1, 2, 0, 1, 2, 0, 1,
+# 		2, 0, 1, 2, 0, 1, 2, 0,
+# 		1, 2, 0, 1, 2, 0, 1, 2,
+# 		0, 1, 2, 0, 1, 2, 0, 1,
+# 		2, 0, 1, 2, 0, 1, 2, 0,
+# 		1, 2, 0, 1, 2, 0, 1, 2,
+# 		0, 1, 2, 0, 1, 2, 0, 1,
+# 		2, 0, 1, 2, 0, 1, 2, 0
+# 	], 1)
+# 	correctNpArrangeList = []
+# 	for arrange in correctNNArrange:
+# 		correctNpArrangeList.append(arrange[0])
+# 	print(npArrangeList[2])
+# 	# print(correctNNArrange)
+# 	assert npArrangeList[2] == np.array(correctNpArrangeList)

@@ -8,9 +8,20 @@ class BestMove(models.Model):
 	move_index = models.IntegerField(null=False)
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
+	replicated = models.BooleanField(default=False)
 
 	class Meta:
 		unique_together = ('first_half_arrangement', 'last_half_arrangement')
+
+	def save_or_update(self):
+		bestMoveInDb = BestMove.objects.filter(
+			first_half_arrangement=self.first_half_arrangement).filter(last_half_arrangement=self.last_half_arrangement)
+		if bestMoveInDb.count() == 0:
+			self.save()
+		else:
+			bestMove = bestMoveInDb.get()
+			bestMove.move_index = self.move_index
+			bestMove.save()
 
 	@staticmethod
 	def hasMoveData(gameArrange):

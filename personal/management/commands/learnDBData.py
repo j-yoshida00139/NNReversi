@@ -1,4 +1,8 @@
+from django.core.management.base import BaseCommand
 from personal.nncore import nnHandler
 
-nnhandler = nnHandler.NNHandler()
-nnhandler.learn()
+
+class Command(BaseCommand):
+	def handle(self, *args, **kwargs):
+		nnHandlerIns = nnHandler.NNHandler()
+		nnHandlerIns.learn()
