@@ -1,6 +1,7 @@
 import pytest
 from mixer.backend.django import mixer
 from personal.models import BestMove
+from personal import dbmanager
 
 pytestmark = pytest.mark.django_db
 
@@ -9,6 +10,17 @@ class Test_BestMove:
 	def test_create(self):
 		obj = mixer.blend('personal.BestMove')
 		assert obj.pk == 1, 'Should create a BestMove instance'
+
+	def test_hasMoveData(self):
+		first_half_arrangement, last_half_arrangement, move_index = 66032381159471, 3939357278671015, 5
+		BestMove(
+			first_half_arrangement=first_half_arrangement,
+			last_half_arrangement=last_half_arrangement,
+			move_index=move_index).save()
+		gameArrange = dbmanager.decodeDBArrange(firstInt=first_half_arrangement, lastInt=last_half_arrangement)
+		assert BestMove.hasMoveData(gameArrange) is True
+		gameArrange = dbmanager.decodeDBArrange(firstInt=last_half_arrangement, lastInt=first_half_arrangement)
+		assert BestMove.hasMoveData(gameArrange) is False
 
 	def test_encodeToNNArrange(self):
 		gameArrange = [

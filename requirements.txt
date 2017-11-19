@@ -18,9 +18,9 @@ py==1.4.34
 Pygments==2.2.0  
 pytest==3.2.3  
 pytest-cov==2.5.1  
-pytest-django==3.1.2  
-pytest-ipdb==0.1    
-pytz==2017.3 
+pytest-django==3.1.2
+git+git://github.com/mverteuil/pytest-ipdb.git
+pytz==2017.3
 setuptools==36.6.0 
 simplegeneric==0.8.1  
 six==1.11.0 
