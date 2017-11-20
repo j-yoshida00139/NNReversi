@@ -1,14 +1,26 @@
 FROM ubuntu
-# ENV PYTHONUNBUFFERED 1
-RUN mkdir /code
-WORKDIR /code
-ADD requirements.txt /code/
-ADD . /code/
-RUN apt-get update
-RUN apt-get install -y python3 python3-pip
-RUN pip3 install --upgrade pip
-RUN pip3 install numpy django
-EXPOSE 8000
-# RUN pip install git+git://github.com/mverteuil/pytest-ipdb.git
-RUN pip3 install -r requirements.txt
-RUN python3 manage.py runserver 172.17.0.2:8000
+
+RUN apt-get update && apt-get install -y python3 python3-pip python3-venv cron nginx git \
+    && mkdir -p /opt/NNReversi && cd /opt/NNReversi \
+    && pyvenv venv && . venv/bin/activate && pip install --upgrade pip \
+    && mkdir -p /var/run/nnreversi /var/log/nnreversi \
+    && chown www-data:www-data /var/run/nnreversi /var/log/nnreversi
+
+COPY . /opt/NNReversi/
+COPY nnreversi.conf /etc/nginx/sites-available/nnreversi.conf
+
+RUN rm /etc/nginx/sites-enabled/default \
+    && ln -s /etc/nginx/sites-available/nnreversi.conf /etc/nginx/sites-enabled/nnreversi.conf \
+    && cd /opt/NNReversi && . venv/bin/activate \
+    && pip install -r /opt/NNReversi/requirements.txt \
+    && touch /opt/NNReversi/django.log && chown -R www-data.www-data /opt/NNReversi
+
+EXPOSE 80
+
+STOPSIGNAL SIGTERM
+
+WORKDIR /opt/NNReversi
+
+CMD . /opt/NNReversi/venv/bin/activate \
+  && service nginx restart \
+  && uwsgi --ini /opt/NNReversi/mysite/uwsgi.ini
