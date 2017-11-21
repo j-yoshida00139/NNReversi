@@ -4,12 +4,12 @@ services:
     image: "python:django"
     container_name: "nnreversi"
     volumes:
-      - ".:/opt/NNReversi"
+      - "../django:/opt/NNReversi/django"
     ports:
       - "80:80"
     command:
       - "bash"
       - "-c"
       # - ". /opt/owltlbs/venv/bin/activate && ./manage.py migrate && ./manage.py runserver 0.0.0.0:80"
-      - ". /opt/NNReversi/venv/bin/activate && ./manage.py migrate && service nginx restart && uwsgi --ini /opt/NNReversi/mysite/uwsgi.ini"
+      - ". /opt/NNReversi/venv/bin/activate && ./manage.py migrate && service nginx restart && uwsgi --ini /opt/NNReversi/django/mysite/uwsgi.ini"
       # Dockerfile ディレクトリ移動 & src専用ディレクトリ作る
