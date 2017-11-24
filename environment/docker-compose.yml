@@ -6,7 +6,7 @@ services:
     volumes:
       - "../django:/opt/NNReversi/django"
     ports:
-      - "80:80"
+      - "8000:80"
     command:
       - "bash"
       - "-c"

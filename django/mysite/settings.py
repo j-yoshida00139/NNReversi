@@ -25,14 +25,13 @@ SECRET_KEY = 'p%l9&hbk5a89sz)3z=-ek3ikm3jxh9v3x=#l$-!7882!9)ulz7'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['172.17.0.2','127.0.0.1','localhost']
+ALLOWED_HOSTS = ['172.17.0.2','127.0.0.1','localhost','nnreversi.tgen.jp.net']
 
 
 # Application definition
 
 INSTALLED_APPS = [
     'personal',
-#    'blog',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
