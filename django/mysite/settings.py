@@ -23,9 +23,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'p%l9&hbk5a89sz)3z=-ek3ikm3jxh9v3x=#l$-!7882!9)ulz7'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['172.17.0.2','127.0.0.1','localhost']
+ALLOWED_HOSTS = ['172.17.0.2','127.0.0.1','localhost','nnreversi.tgen.jp.net']
 
 
 # Application definition
