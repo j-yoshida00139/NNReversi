@@ -33,7 +33,6 @@ ALLOWED_HOSTS = ['172.17.0.2','127.0.0.1','localhost','nnreversi.tgen.jp.net']
 
 INSTALLED_APPS = [
     'personal',
-#    'blog',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
