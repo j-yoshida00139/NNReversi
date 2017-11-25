@@ -2,18 +2,18 @@
 import sys, os
 
 import numpy as np
-from optimizer import *
+from personal.utils.optimizer import SGD, Momentum, Nesterov, AdaGrad, RMSprop, Adam
 
 
 class Trainer:
 	"""ニューラルネットの訓練を行うクラス
 	"""
 
-	def __init__(self, network, x_train, t_train, x_test, t_test,
-					#epochs=20, mini_batch_size=100,
-					epochs=100, mini_batch_size=100,
-					optimizer='SGD', optimizer_param={'lr':0.01},
-					evaluate_sample_num_per_epoch=None, verbose=True):
+	def __init__(
+			self, network, x_train, t_train, x_test, t_test,
+			epochs=100, mini_batch_size=100,
+			optimizer='SGD', optimizer_param={'lr': 0.01},
+			evaluate_sample_num_per_epoch=None, verbose=True):
 		self.network = network
 		self.verbose = verbose
 		self.x_train = x_train
@@ -25,8 +25,10 @@ class Trainer:
 		self.evaluate_sample_num_per_epoch = evaluate_sample_num_per_epoch
 
 		# optimzer
-		optimizer_class_dict = {'sgd':SGD, 'momentum':Momentum, 'nesterov':Nesterov,
-								'adagrad':AdaGrad, 'rmsprpo':RMSprop, 'adam':Adam}
+		optimizer_class_dict = {
+			'sgd': SGD, 'momentum': Momentum, 'nesterov': Nesterov,
+			'adagrad': AdaGrad, 'rmsprpo': RMSprop, 'adam': Adam
+		}
 		self.optimizer = optimizer_class_dict[optimizer.lower()](**optimizer_param)
 
 		self.train_size = x_train.shape[0]
@@ -49,7 +51,8 @@ class Trainer:
 
 		loss = self.network.loss(x_batch, t_batch)
 		self.train_loss_list.append(loss)
-		if self.verbose: print("train loss:" + str(loss))
+		if self.verbose:
+			print("train loss:" + str(loss))
 
 		if self.current_iter % self.iter_per_epoch == 0:
 			self.current_epoch += 1
@@ -82,5 +85,3 @@ class Trainer:
 			print("test acc:" + str(test_acc))
 
 		self.network.save_params()
-
-

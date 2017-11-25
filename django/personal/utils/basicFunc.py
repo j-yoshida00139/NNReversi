@@ -1,14 +1,15 @@
 import numpy as np
-from personal import game
+import random
+from personal.utils import game
 
 
-def unsharedCopy(inList):
-	if isinstance(inList, list):
-		return list(map(unsharedCopy, inList))
-	return inList
+def unshared_copy(in_list):
+	if isinstance(in_list, list):
+		return list(map(unshared_copy, in_list))
+	return in_list
 
 
-def convInput(input_array):
+def conv_input(input_array):
 	input_tmp_array = []
 	for input_data in input_array:
 		input_tmp_array.append(input_data[0])
@@ -24,13 +25,13 @@ def convInput(input_array):
 	return input_nparray
 
 
-def calcWinRatio(arrangeList, nextColor, yourColor):
-	numGame, win, games = 100, 0, 0
-	for i in range(numGame):
-		tmpGame = game.Game(8, 8, unsharedCopy(arrangeList), nextColor)
-		while not tmpGame.isEnded():
-			tmpGame.goNextWithAutoMove()
-		games += 1 if not tmpGame.getWinnersColor() == 0 else 0 # Not even score
-		win += 1 if tmpGame.getWinnersColor() == yourColor else 0
-	winRatio = win / games * 100.0 if games != 0 else 0.0
-	return winRatio
+def calc_win_ratio(arrange_list, next_color, your_color):
+	num_game, win, games = 100, 0, 0
+	for i in range(num_game):
+		tmp_game = game.Game(8, 8, unshared_copy(arrange_list), next_color)
+		while not tmp_game.is_ended():
+			tmp_game.go_next_with_auto_move(nn_flag=random.choice([True, False]))
+		games += 1 if not tmp_game.get_winners_color() == 0 else 0  # Not even score
+		win += 1 if tmp_game.get_winners_color() == your_color else 0
+	win_ratio = win / games * 100.0 if games != 0 else 0.0
+	return win_ratio

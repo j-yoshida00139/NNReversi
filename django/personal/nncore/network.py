@@ -48,13 +48,13 @@ class Network(object):
 		for layer in self.layers:
 			if isinstance(layer, Convolution):
 				convParam = next(conv_iter)
-				layer.setParams(
+				layer.set_params(
 					self.params['W' + str(prmIdx + 1)], self.params['b' + str(prmIdx + 1)], convParam['stride'], convParam['pad'])
 				prmIdx += 1
 			elif isinstance(layer, Pooling):
-				layer.setParams(pool_h=2, pool_w=2, stride=2)
+				layer.set_params(pool_h=2, pool_w=2, stride=2)
 			elif isinstance(layer, AffineLayer):
-				layer.setParams(self.params['W' + str(prmIdx + 1)], self.params['b' + str(prmIdx + 1)])
+				layer.set_params(self.params['W' + str(prmIdx + 1)], self.params['b' + str(prmIdx + 1)])
 				prmIdx += 1
 
 	def feedforward(self, x, train_flg=False):

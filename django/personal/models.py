@@ -14,77 +14,77 @@ class BestMove(models.Model):
 		unique_together = ('first_half_arrangement', 'last_half_arrangement')
 
 	def save_or_update(self):
-		bestMoveInDb = BestMove.objects.filter(
+		best_move_in_db = BestMove.objects.filter(
 			first_half_arrangement=self.first_half_arrangement).filter(last_half_arrangement=self.last_half_arrangement)
-		if bestMoveInDb.count() == 0:
+		if best_move_in_db.count() == 0:
 			self.save()
 		else:
-			bestMove = bestMoveInDb.get()
-			bestMove.move_index = self.move_index
-			bestMove.save()
+			best_move = best_move_in_db.get()
+			best_move.move_index = self.move_index
+			best_move.save()
 
 	@staticmethod
-	def hasMoveData(gameArrange):
-		firstHalf, lastHalf = BestMove.encodeToDBArrange(gameArrange)
-		countInDB = BestMove.objects.filter(
-			first_half_arrangement=firstHalf).filter(last_half_arrangement=lastHalf).count()
-		if countInDB == 0:
+	def has_move_data(game_arrange):
+		first_half, last_half = BestMove.encode_to_db_arrange(game_arrange)
+		count_in_db = BestMove.objects.filter(
+			first_half_arrangement=first_half).filter(last_half_arrangement=last_half).count()
+		if count_in_db == 0:
 			return False
 		else:
 			return True
 
 	@staticmethod
-	def encodeToDBArrange(gameArrange):
-		arrangeInt = 0
-		for i in gameArrange:
-			arrangeInt = arrangeInt * 3 + i
-		firstInt, lastInt = BestMove.getFirstLastArrangeInt(arrangeInt)
-		return firstInt, lastInt
+	def encode_to_db_arrange(game_arrange):
+		arrange_int = 0
+		for i in game_arrange:
+			arrange_int = arrange_int * 3 + i
+		first_int, last_int = BestMove.get_first_last_arrange_int(arrange_int)
+		return first_int, last_int
 
 	@staticmethod
-	def encodeToNNArrange(arrange2Dim, playerColor):
-		nnArrange = []
-		arrange1Dim = np.array(arrange2Dim).reshape(64).tolist()
-		for color in arrange1Dim:
+	def encode_to_nn_arrange(arrange_2dim, player_color):
+		nn_arrange = []
+		arrange_1dim = np.array(arrange_2dim).reshape(64).tolist()
+		for color in arrange_1dim:
 			if color == 0:
-				nnArrange.extend([[float(1)], [float(0)], [float(0)]])
-			elif color == playerColor:
-				nnArrange.extend([[float(0)], [float(1)], [float(0)]])
+				nn_arrange.extend([[float(1)], [float(0)], [float(0)]])
+			elif color == player_color:
+				nn_arrange.extend([[float(0)], [float(1)], [float(0)]])
 			else:
-				nnArrange.extend([[float(0)], [float(0)], [float(1)]])
-		return nnArrange
+				nn_arrange.extend([[float(0)], [float(0)], [float(1)]])
+		return nn_arrange
 
 	@staticmethod
-	def convToGameArrange(colorArrange, playerColor):
-		gameArrange = []
-		for row_i, row in enumerate(colorArrange):
+	def conv_to_game_arrange(color_arrange, player_color):
+		game_arrange = []
+		for row_i, row in enumerate(color_arrange):
 			for col_i, col in enumerate(row):
-				if colorArrange[row_i][col_i] == 0:
-					gameArrange.append(2)
-				elif colorArrange[row_i][col_i] == playerColor:
-					gameArrange.append(1)
+				if color_arrange[row_i][col_i] == 0:
+					game_arrange.append(2)
+				elif color_arrange[row_i][col_i] == player_color:
+					game_arrange.append(1)
 				else:
-					gameArrange.append(0)
-		return gameArrange
+					game_arrange.append(0)
+		return game_arrange
 
 	@staticmethod
-	def storeBestMove(winnersMove):
-		gameArrange = BestMove.convToGameArrange(winnersMove["arrange"], winnersMove["color"])
-		firstHalf, lastHalf = BestMove.encodeToDBArrange(gameArrange)
-		outIndex = BestMove.encodeToDBMove(winnersMove["row"], winnersMove["col"])
-		bestMove = BestMove(first_half_arrangement=firstHalf, last_half_arrangement=lastHalf, move_index=outIndex)
-		bestMove.save()
+	def store_best_move(winners_move):
+		game_arrange = BestMove.conv_to_game_arrange(winners_move["arrange"], winners_move["color"])
+		first_half, last_half = BestMove.encode_to_db_arrange(game_arrange)
+		out_index = BestMove.encode_to_db_move(winners_move["row"], winners_move["col"])
+		best_move = BestMove(first_half_arrangement=first_half, last_half_arrangement=last_half, move_index=out_index)
+		best_move.save()
 
 	@staticmethod
-	def encodeToDBMove(row, col):
-		moveIndex = row * 8 + col
-		return moveIndex
+	def encode_to_db_move(row, col):
+		move_index = row * 8 + col
+		return move_index
 
 	@staticmethod
-	def getFirstLastArrangeInt(arrangeInt):
-		firstHalf, lastHalf = divmod(arrangeInt, int(1E16))
-		return firstHalf, lastHalf
+	def get_first_last_arrange_int(arrange_int):
+		first_half, last_half = divmod(arrange_int, int(1E16))
+		return first_half, last_half
 
 	@staticmethod
-	def getWholeArrangeInt(firstInt, lastInt):
-		return firstInt * int(1E16) + lastInt
+	def get_whole_arrange_int(first_int, last_int):
+		return first_int * int(1E16) + last_int

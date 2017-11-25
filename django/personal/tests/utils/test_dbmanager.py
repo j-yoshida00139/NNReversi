@@ -1,13 +1,14 @@
 import pytest
-from personal.dbmanager import *
+
+from personal.utils.dbmanager import *
 
 pytestmark = pytest.mark.django_db
 
 
-def test_decodeDBArrange():
-	firstInt = 66032381159471
-	lastInt = 3939357278671015
-	gameArrange = [
+def test_decode_db_arrange():
+	first_int = 66032381159471
+	last_int = 3939357278671015
+	game_arrange = [
 		0, 1, 2, 0, 1, 2, 0, 1,
 		2, 0, 1, 2, 0, 1, 2, 0,
 		1, 2, 0, 1, 2, 0, 1, 2,
@@ -17,59 +18,59 @@ def test_decodeDBArrange():
 		0, 1, 2, 0, 1, 2, 0, 1,
 		2, 0, 1, 2, 0, 1, 2, 0
 	]
-	assert decodeDBArrange(firstInt, lastInt) == gameArrange
+	assert decode_db_arrange(first_int, last_int) == game_arrange
 
 
-def test_flipTwoDimList():
+def test_flip_two_dim_list():
 	sample = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-	assert flipTwoDimList(sample, "Horizontal") == [[3, 2, 1], [6, 5, 4], [9, 8, 7]]
+	assert flip_two_dim_list(sample, "Horizontal") == [[3, 2, 1], [6, 5, 4], [9, 8, 7]]
 	sample = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-	assert flipTwoDimList(sample, "Vertical") == [[7, 8, 9], [4, 5, 6], [1, 2, 3]]
+	assert flip_two_dim_list(sample, "Vertical") == [[7, 8, 9], [4, 5, 6], [1, 2, 3]]
 	with pytest.raises(BaseException):
-		flipTwoDimList(sample, "Other")
+		flip_two_dim_list(sample, "Other")
 
 
-def test_flipArrangeInt():
-	arrangeInt = 660323811594713939357278671015
-	flippedIntHor = 1452430613618011145185326950141
-	assert flipArrangeInt(arrangeInt, "Horizontal") == flippedIntHor
-	flippedIntVer = 2509029184243533849258951963655
-	assert flipArrangeInt(arrangeInt, "Vertical") == flippedIntVer
+def test_flip_arrange_int():
+	arrange_int = 660323811594713939357278671015
+	flipped_int_hor = 1452430613618011145185326950141
+	assert flip_arrange_int(arrange_int, "Horizontal") == flipped_int_hor
+	flipped_int_ver = 2509029184243533849258951963655
+	assert flip_arrange_int(arrange_int, "Vertical") == flipped_int_ver
 	with pytest.raises(BaseException):
-		flipArrangeInt(arrangeInt, "Other")
+		flip_arrange_int(arrange_int, "Other")
 
 
-def test_flipMoveInt():
-	samplesHor = [[0, 7], [1, 6], [9, 14], [17, 22]]
-	samplesVer = [[0, 56], [1, 57], [9, 49], [17, 41]]
-	for sample, correct in samplesHor:
-		assert flipMoveInt(sample, "Horizontal") == correct
-	for sample, correct in samplesVer:
-		assert flipMoveInt(sample, "Vertical") == correct
+def test_flip_move_int():
+	samples_hor = [[0, 7], [1, 6], [9, 14], [17, 22]]
+	samples_ver = [[0, 56], [1, 57], [9, 49], [17, 41]]
+	for sample, correct in samples_hor:
+		assert flip_move_int(sample, "Horizontal") == correct
+	for sample, correct in samples_ver:
+		assert flip_move_int(sample, "Vertical") == correct
 	with pytest.raises(BaseException):
-		flipMoveInt(-1, "Horizontal")
+		flip_move_int(-1, "Horizontal")
 	with pytest.raises(BaseException):
-		flipMoveInt(64, "Vertical")
+		flip_move_int(64, "Vertical")
 	with pytest.raises(BaseException):
-		flipMoveInt(1, "Other")
+		flip_move_int(1, "Other")
 	with pytest.raises(BaseException):
-		flipMoveInt(64, "Other")
+		flip_move_int(64, "Other")
 
 
-def test_extractListByIndices():
-	nList = [1, 3, 6]
-	targetList = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
-	extractedList = extractListByIndices(targetList, nList)
-	assert extractedList == ['b', 'd', 'g']
+def test_extract_list_by_indices():
+	n_list = [1, 3, 6]
+	target_list = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+	extracted_list = extract_list_by_indices(target_list, n_list)
+	assert extracted_list == ['b', 'd', 'g']
 
 
-def test_extractNNDataByIndices():
+def test_extract_nn_data_by_indices():
 	BestMove(first_half_arrangement=66032381159471, last_half_arrangement=3939357278671015, move_index=5).save()
 	BestMove(first_half_arrangement=145243061361801, last_half_arrangement=1145185326950141, move_index=10).save()
 	BestMove(first_half_arrangement=250902918424353, last_half_arrangement=3849258951963655, move_index=25).save()
-	nList = [2, 1, 0]
-	correctNNArrangeList = [
-		BestMove.encodeToNNArrange([
+	n_list = [2, 1, 0]
+	correct_nn_arrange_list = [
+		BestMove.encode_to_nn_arrange([
 			2, 0, 1, 2, 0, 1, 2, 0,
 			0, 1, 2, 0, 1, 2, 0, 1,
 			1, 2, 0, 1, 2, 0, 1, 2,
@@ -79,7 +80,7 @@ def test_extractNNDataByIndices():
 			2, 0, 1, 2, 0, 1, 2, 0,
 			0, 1, 2, 0, 1, 2, 0, 1
 		], 1),
-		BestMove.encodeToNNArrange([
+		BestMove.encode_to_nn_arrange([
 			1, 0, 2, 1, 0, 2, 1, 0,
 			0, 2, 1, 0, 2, 1, 0, 2,
 			2, 1, 0, 2, 1, 0, 2, 1,
@@ -89,7 +90,7 @@ def test_extractNNDataByIndices():
 			1, 0, 2, 1, 0, 2, 1, 0,
 			0, 2, 1, 0, 2, 1, 0, 2
 		], 1),
-		BestMove.encodeToNNArrange([
+		BestMove.encode_to_nn_arrange([
 			0, 1, 2, 0, 1, 2, 0, 1,
 			2, 0, 1, 2, 0, 1, 2, 0,
 			1, 2, 0, 1, 2, 0, 1, 2,
@@ -100,7 +101,7 @@ def test_extractNNDataByIndices():
 			2, 0, 1, 2, 0, 1, 2, 0
 		], 1)
 	]
-	correctNNMoveList = [
+	correct_nn_move_list = [
 		[
 			0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0,
@@ -130,8 +131,8 @@ def test_extractNNDataByIndices():
 			0, 0, 0, 0, 0, 0, 0, 0
 		]
 	]
-	npArrangeList, npMoveList = extractNNDataByIndices(nList)
-	correctNpArrangeList = np.array([np.reshape(correctNNArrange, 192) for correctNNArrange in correctNNArrangeList])
-	assert npArrangeList.all() == correctNpArrangeList.all()
-	correctNpMoveList = np.array([np.reshape(correctNNMove, 64) for correctNNMove in correctNNMoveList])
-	assert npMoveList.all() == correctNpMoveList.all()
+	np_arrange_list, np_move_list = extract_nn_data_by_indices(n_list)
+	correct_np_arrange_list = np.array([np.reshape(correctNNArrange, 192) for correctNNArrange in correct_nn_arrange_list])
+	assert np_arrange_list.all() == correct_np_arrange_list.all()
+	correct_np_move_list = np.array([np.reshape(correctNNMove, 64) for correctNNMove in correct_nn_move_list])
+	assert np_move_list.all() == correct_np_move_list.all()
