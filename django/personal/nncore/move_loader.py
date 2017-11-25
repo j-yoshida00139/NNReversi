@@ -62,8 +62,8 @@ def get_random_data(n_training, n_validation, n_test, n_total):
 	num_validation_list = num_list[n_training: n_training+n_validation]
 	num_test_list = num_list[n_training+n_validation: n_training+n_validation+n_test]
 
-	x_train, t_train = dbmanager.extractNNDataByIndices(num_training_list)
-	x_eva, t_eva = dbmanager.extractNNDataByIndices(num_validation_list)
-	x_test, t_test = dbmanager.extractNNDataByIndices(num_test_list)
+	x_train, t_train = dbmanager.extract_nn_data_by_indices(num_training_list)
+	x_eva, t_eva = dbmanager.extract_nn_data_by_indices(num_validation_list)
+	x_test, t_test = dbmanager.extract_nn_data_by_indices(num_test_list)
 
 	return x_train, t_train, x_eva, t_eva, x_test, t_test

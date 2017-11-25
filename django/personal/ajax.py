@@ -23,7 +23,7 @@ def nextMove(request):
 
 		arrangeArray = json.loads(arrange)
 		canPutList = json.loads(canPut)
-		arrangeList = BestMove.encodeToNNArrange(arrangeArray, colorInt)
+		arrangeList = BestMove.encode_to_nn_arrange(arrangeArray, colorInt)
 		arrangeList = basicFunc.convInput(arrangeList)
 
 		net = network.Network()
@@ -54,8 +54,8 @@ def storeWinnersData(request):
 		print(winnersDataArray)
 
 		for winnersData in winnersDataArray:
-			if not BestMove.hasMoveData(winnersData["arrange"], winnersData["color"]):
-				BestMove.storeBestMove(winnersData)
+			if not BestMove.has_move_data(winnersData["arrange"], winnersData["color"]):
+				BestMove.store_best_move(winnersData)
 
 		return HttpResponse(winnersDataArray, content_type='application/json')
 	else:
