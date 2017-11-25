@@ -1,5 +1,5 @@
 import numpy as np
-
+import random
 from personal.utils import game
 
 
@@ -30,7 +30,7 @@ def calc_win_ratio(arrange_list, next_color, your_color):
 	for i in range(num_game):
 		tmp_game = game.Game(8, 8, unshared_copy(arrange_list), next_color)
 		while not tmp_game.is_ended():
-			tmp_game.go_next_with_auto_move()
+			tmp_game.go_next_with_auto_move(nn_flag=random.choice([True, False]))
 		games += 1 if not tmp_game.get_winners_color() == 0 else 0  # Not even score
 		win += 1 if tmp_game.get_winners_color() == your_color else 0
 	win_ratio = win / games * 100.0 if games != 0 else 0.0

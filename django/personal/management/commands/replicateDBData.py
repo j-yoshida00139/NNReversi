@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
+
 from personal.models import BestMove
-from personal import dbmanager
+from personal.utils import dbmanager
 
 
 class Command(BaseCommand):

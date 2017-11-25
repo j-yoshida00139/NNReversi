@@ -193,10 +193,9 @@ class Game(object):
 			arrange_list = BestMove.encode_to_nn_arrange(self.arrange, self.nextColor)
 			arrange_list = basicFunc.conv_input(arrange_list)
 			move = self.net.feedforward(np.array(arrange_list))  # move[0][0:63]
-			# move = self.net.feedforward(np.array(arrange_list).T)  # move[0][0:63]
 			move = mathFunc.softmax(move)
 		else:
-			move = np.random.rand(1,64)  # move[0][0:63]
+			move = np.random.rand(1, 64)  # move[0][0:63]
 		index = np.argmax(move[0] * self.get_can_put_list(self.nextColor))
 		row, col = divmod(index, 8)
 		self.go_next_with_manual_move(row, col)

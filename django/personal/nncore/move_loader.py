@@ -4,10 +4,12 @@ move_loader
 A library to load the move data of reversi.
 """
 
-import random
 import math
+import random
+
 import numpy as np
-from personal import dbmanager
+
+from personal.utils import dbmanager
 
 
 def load_data(batch_size, flatten=True):

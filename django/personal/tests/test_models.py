@@ -1,7 +1,8 @@
 import pytest
 from mixer.backend.django import mixer
+
 from personal.models import BestMove
-from personal import dbmanager
+from personal.utils import dbmanager
 
 pytestmark = pytest.mark.django_db
 
