@@ -130,8 +130,10 @@ class Game(object):
 	def get_winners_data(self):
 		if self.get_score(self.BLACK) > self.get_score(self.WHITE):
 			return self.blackMove
-		else:
+		elif self.get_score(self.BLACK) < self.get_score(self.WHITE):
 			return self.whiteMove
+		else:
+			return None
 
 	def go_next_turn(self):
 		self.nextColor = self.WHITE if self.nextColor == self.BLACK else self.BLACK
