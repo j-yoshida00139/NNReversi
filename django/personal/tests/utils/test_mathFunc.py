@@ -10,9 +10,8 @@ def test_sigmoid_prime():
 
 
 def test_base_10_to_n_str():
-	assert int(base10ToNStr(10, 3)) == 101
+	assert int(base_10_to_n_str(10, 3)) == 101
 
 
 def test_base_10_to_n():
-	assert base10ToN(140, 3) == 12012
-
+	assert base_10_to_n(140, 3) == 12012

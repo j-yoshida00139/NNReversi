@@ -23,11 +23,25 @@ def test_decode_db_arrange():
 
 def test_flip_two_dim_list():
 	sample = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-	assert flip_two_dim_list(sample, "Horizontal") == [[3, 2, 1], [6, 5, 4], [9, 8, 7]]
+	assert flip_2dim_list(sample, "Horizontal") == [[3, 2, 1], [6, 5, 4], [9, 8, 7]]
 	sample = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-	assert flip_two_dim_list(sample, "Vertical") == [[7, 8, 9], [4, 5, 6], [1, 2, 3]]
+	assert flip_2dim_list(sample, "Vertical") == [[7, 8, 9], [4, 5, 6], [1, 2, 3]]
 	with pytest.raises(BaseException):
-		flip_two_dim_list(sample, "Other")
+		flip_2dim_list(sample, "Other")
+
+
+def test_rotate_2dim_list_90deg():
+	sample = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+	assert rotate_2dim_list_90deg(sample) == [[3, 6, 9], [2, 5, 8], [1, 4, 7]]
+
+
+def test_rotate_2dim_list_degree():
+	sample = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+	assert rotate_2dim_list(sample, 0) == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+	assert rotate_2dim_list(sample, 90) == [[3, 6, 9], [2, 5, 8], [1, 4, 7]]
+	assert rotate_2dim_list(sample, 180) == [[9, 8, 7], [6, 5, 4], [3, 2, 1]]
+	assert rotate_2dim_list(sample, 270) == [[7, 4, 1], [8, 5, 2], [9, 6, 3]]
+	assert rotate_2dim_list(sample, 360) == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
 
 def test_flip_arrange_int():
