@@ -28,7 +28,7 @@ def next_move(request):
 		arrange_list = basicFunc.conv_input(arrange_list)
 
 		net = network.Network()
-		result = net.feedforward(arrange_list)
+		result = net.feed_forward(arrange_list)
 		result_list = []
 		for resultValue in result[0]:
 			result_list.append(float(resultValue))

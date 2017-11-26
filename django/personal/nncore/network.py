@@ -9,7 +9,7 @@ class Network(object):
 	def __init__(
 			self,
 			input_dim=(3, 8, 8),
-			convParams=(
+			conv_params=(
 					{'filter_num': 16, 'filter_size': 4, 'pad': 2, 'stride': 1},
 					{'filter_num': 16, 'filter_size': 4, 'pad': 2, 'stride': 1},
 					{'filter_num': 32, 'filter_size': 4, 'pad': 2, 'stride': 1},
@@ -36,28 +36,29 @@ class Network(object):
 		self.layers.append(Relu())
 		self.layers.append(AffineLayer())
 		self.last_layer = SoftmaxCrossEntropyLayer()
+		self.params = {}
 
 		if os.path.exists("params.pkl"):
 			self.load_params()
 		else:
 			raise BaseException("No params.pkl")
-			self.initParams(input_dim, convParams, affineParams)
+			self.init_params(input_dim, conv_params, affineParams)
 
-		prmIdx = 0
-		conv_iter = iter(convParams)
+		prm_idx = 0
+		conv_iter = iter(conv_params)
 		for layer in self.layers:
 			if isinstance(layer, Convolution):
-				convParam = next(conv_iter)
+				conv_param = next(conv_iter)
 				layer.set_params(
-					self.params['W' + str(prmIdx + 1)], self.params['b' + str(prmIdx + 1)], convParam['stride'], convParam['pad'])
-				prmIdx += 1
+					self.params['W' + str(prm_idx + 1)], self.params['b' + str(prm_idx + 1)], conv_param['stride'], conv_param['pad'])
+				prm_idx += 1
 			elif isinstance(layer, Pooling):
 				layer.set_params(pool_h=2, pool_w=2, stride=2)
 			elif isinstance(layer, AffineLayer):
-				layer.set_params(self.params['W' + str(prmIdx + 1)], self.params['b' + str(prmIdx + 1)])
-				prmIdx += 1
+				layer.set_params(self.params['W' + str(prm_idx + 1)], self.params['b' + str(prm_idx + 1)])
+				prm_idx += 1
 
-	def feedforward(self, x, train_flg=False):
+	def feed_forward(self, x, train_flg=False):
 		for layer in self.layers:
 			if isinstance(layer, Dropout):
 				x = layer.forward(x, train_flg)
@@ -66,7 +67,7 @@ class Network(object):
 		return x
 
 	def loss(self, x, t):
-		y = self.feedforward(x, train_flg=True)
+		y = self.feed_forward(x, train_flg=True)
 		return self.last_layer.forward(y, t)
 
 	def accuracy(self, x, t, batch_size=100):
@@ -77,7 +78,7 @@ class Network(object):
 		for i in range(int(x.shape[0] / batch_size)):
 			tx = x[i*batch_size:(i+1)*batch_size]
 			tt = t[i*batch_size:(i+1)*batch_size]
-			y = self.feedforward(tx, train_flg=False)
+			y = self.feed_forward(tx, train_flg=False)
 			y = np.argmax(y, axis=1)
 			acc += np.sum(y == tt)
 
@@ -88,13 +89,13 @@ class Network(object):
 		self.loss(x, t)
 
 		# backward
-		dout = 1
-		dout = self.last_layer.backward(dout)
+		d_out = 1
+		d_out = self.last_layer.backward(d_out)
 
 		tmp_layers = self.layers.copy()
 		tmp_layers.reverse()
 		for layer in tmp_layers:
-			dout = layer.backward(dout)
+			d_out = layer.backward(d_out)
 
 		# 設定
 		grads = {}
@@ -107,45 +108,50 @@ class Network(object):
 
 		return grads
 
-	def initParams(self, input_dim, convParams, affineParams):
+	def init_params(self, input_dim, conv_params, affine_params):
 		self.params = {}
-		prmIdx = 0
+		prm_idx = 0
 		pre_channel, pre_height, pre_width = input_dim
-		affine_iter, conv_iter = iter(affineParams), iter(convParams)
+		affine_iter, conv_iter = iter(affine_params), iter(conv_params)
 		for layer in self.layers:
 			if isinstance(layer, Relu) or isinstance(layer, Dropout):
 				continue
 
 			if isinstance(layer, Convolution):
-				convParam = next(conv_iter)
-				conn_to_pre_layer = pre_channel * (convParam['filter_size'] ** 2)
+				conv_param = next(conv_iter)
+				conn_to_pre_layer = pre_channel * (conv_param['filter_size'] ** 2)
 				weight_init_scale = math.sqrt(2.0 / conn_to_pre_layer)
-				self.params['W' + str(prmIdx + 1)] = weight_init_scale * \
-								np.random.randn(convParam['filter_num'], pre_channel,
-												convParam['filter_size'], convParam['filter_size'])
-				self.params['b' + str(prmIdx + 1)] = np.zeros(convParam['filter_num'])
-				FN, _C, FH, FW = self.params['W' + str(prmIdx + 1)].shape
-				height = int((pre_height + 2 * convParam['pad'] - (FH - 1)) / convParam['stride'])
-				width  = int((pre_width  + 2 * convParam['pad'] - (FW - 1)) / convParam['stride'])
+				self.params['W' + str(prm_idx + 1)] =\
+					weight_init_scale * np.random.randn(
+						conv_param['filter_num'],
+						pre_channel,
+						conv_param['filter_size'],
+						conv_param['filter_size']
+					)
+				self.params['b' + str(prm_idx + 1)] = np.zeros(conv_param['filter_num'])
+				FN, _C, FH, FW = self.params['W' + str(prm_idx + 1)].shape
+				height = int((pre_height + 2 * conv_param['pad'] - (FH - 1)) / conv_param['stride'])
+				width = int((pre_width + 2 * conv_param['pad'] - (FW - 1)) / conv_param['stride'])
 				pre_channel, pre_height, pre_width = FN, height, width
 
-			elif isinstance(layer, Pooling): # no parameter
+			elif isinstance(layer, Pooling):  # no parameter
 				height = int((pre_height + self.pad * 2) / self.stride)
-				width  = int((pre_width  + self.pad * 2) / self.stride)
+				width = int((pre_width + self.pad * 2) / self.stride)
 				pre_channel, pre_height, pre_width = pre_channel, height, width
 
 			elif isinstance(layer, AffineLayer):
-				affineParam = next(affine_iter)
+				affine_param = next(affine_iter)
 				conn_to_pre_layer = pre_channel * pre_height * pre_width
 				weight_init_scale = math.sqrt(2.0 / conn_to_pre_layer)
 
-				self.params['W' + str(prmIdx + 1)] = weight_init_scale * np.random.randn(pre_channel * pre_height * pre_width, affineParam)
-				self.params['b' + str(prmIdx + 1)] = np.zeros(affineParam)
-				FN = self.params['b' + str(prmIdx + 1)].shape[0]
+				self.params['W' + str(prm_idx + 1)] = weight_init_scale * np.random.randn(
+					pre_channel * pre_height * pre_width, affine_param)
+				self.params['b' + str(prm_idx + 1)] = np.zeros(affine_param)
+				FN = self.params['b' + str(prm_idx + 1)].shape[0]
 				height, width = 1, 1
 				pre_channel, pre_height, pre_width = FN, height, width
 
-			prmIdx = prmIdx + 1 if not(isinstance(layer, Pooling)) else prmIdx
+			prm_idx = prm_idx + 1 if not(isinstance(layer, Pooling)) else prm_idx
 
 	def save_params(self, file_name="params.pkl"):
 		params = {}

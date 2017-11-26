@@ -6,27 +6,40 @@ from personal.utils import dbmanager
 
 class Command(BaseCommand):
 	def handle(self, *args, **kwargs):
-		bestMoveList = BestMove.objects.filter(replicated=False)[:1000]
-		print("Number of data:{0}".format(len(bestMoveList)))
+		best_move_list = BestMove.objects.filter(replicated=False)[:1000]
+		print("Number of data:{0}".format(len(best_move_list)))
 		count = 0
-		for bestMove in bestMoveList:
-			arrangeInt = BestMove.get_whole_arrange_int(bestMove.first_half_arrangement, bestMove.last_half_arrangement)
+		direction_list = ["Horizontal", "Vertical"]
+		for bestMove in best_move_list:
+			arrange_int = BestMove.get_whole_arrange_int(bestMove.first_half_arrangement, bestMove.last_half_arrangement)
 
-			# Horizontal Symmetry Data
-			symmArrangeInt = dbmanager.flip_arrange_int(arrangeInt, "Horizontal")
-			firstInt, lastInt = BestMove.get_first_last_arrange_int(symmArrangeInt)
-			moveInt = int(dbmanager.flip_move_int(bestMove.move_index, "Horizontal"))
-			newBestMove = BestMove(first_half_arrangement=firstInt, last_half_arrangement=lastInt, move_index=moveInt)
-			newBestMove.save_or_update()
+			for direction in direction_list:
+				symm_arrange_int = dbmanager.flip_arrange_int(arrange_int, direction)
+				first_int, last_int = BestMove.get_first_last_arrange_int(symm_arrange_int)
+				move_int = int(dbmanager.flip_move_int(bestMove.move_index, direction))
+				new_best_move = BestMove(
+					first_half_arrangement=first_int, last_half_arrangement=last_int, move_index=move_int, replicated=True)
+				new_best_move.save_or_update()
 
-			# Vertical Symmetry Data
-			symmArrangeInt = dbmanager.flip_arrange_int(arrangeInt, "Vertical")
-			firstInt, lastInt = BestMove.get_first_last_arrange_int(symmArrangeInt)
-			moveInt = int(dbmanager.flip_move_int(bestMove.move_index, "Vertical"))
-			newBestMove = BestMove(first_half_arrangement=firstInt, last_half_arrangement=lastInt, move_index=moveInt)
-			newBestMove.save_or_update()
+			for degree in [90, 180, 270]:
+				rotated_arrange_int = dbmanager.rotate_arrange_int(arrange_int, degree)
+				first_int, last_int = BestMove.get_first_last_arrange_int(rotated_arrange_int)
+				move_int = int(dbmanager.rotate_move_int(bestMove.move_index, degree))
+				new_best_move = BestMove(
+					first_half_arrangement=first_int, last_half_arrangement=last_int, move_index=move_int, replicated=True)
+				new_best_move.save_or_update()
+
+			rotated_arrange_int = dbmanager.rotate_arrange_int(arrange_int, degree)
+			rotated_move_int = int(dbmanager.rotate_move_int(bestMove.move_index, 90))
+			for direction in direction_list:
+				symm_arrange_int = dbmanager.flip_arrange_int(rotated_arrange_int, direction)
+				first_int, last_int = BestMove.get_first_last_arrange_int(symm_arrange_int)
+				move_int = int(dbmanager.flip_move_int(rotated_move_int, direction))
+				new_best_move = BestMove(
+					first_half_arrangement=first_int, last_half_arrangement=last_int, move_index=move_int, replicated=True)
+				new_best_move.save_or_update()
 
 			bestMove.replicated = True
 			bestMove.save()
 			count += 1
-			print("No.{0} is replicated. {1}%".format(count, float(count*100)/len(bestMoveList)))
+			print("No.{0} is replicated. {1}%".format(count, float(count*100)/len(best_move_list)))

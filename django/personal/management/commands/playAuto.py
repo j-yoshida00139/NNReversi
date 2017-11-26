@@ -1,16 +1,14 @@
 from datetime import datetime
-
 from django.core.management.base import BaseCommand
-
 from personal.models import BestMove
 from personal.utils import basicFunc, game
+import random
 
 # numGames = 500
 numGames = 10
 
 
 class Command(BaseCommand):
-
 	def handle(self, *args, **kwargs):
 		num_win = 0
 		for i in range(0, numGames):
@@ -27,11 +25,7 @@ class Command(BaseCommand):
 					BestMove.store_best_move(winners_move)
 				else:
 					print("Best move is already exist.")
-
-				if main_game.nextColor == main_game.BLACK:
-					main_game.go_next_with_auto_move(True)  # with Neural Network move
-				else:
-					main_game.go_next_with_auto_move()  # with random move
+				main_game.go_next_with_auto_move(random.choice([True, False]))
 			print("%s games was finished. BLACK:%d WHITE:%d" % (
 				i, main_game.get_score(main_game.BLACK), main_game.get_score(main_game.WHITE)))
 

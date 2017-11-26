@@ -192,7 +192,7 @@ class Game(object):
 		if nn_flag:
 			arrange_list = BestMove.encode_to_nn_arrange(self.arrange, self.nextColor)
 			arrange_list = basicFunc.conv_input(arrange_list)
-			move = self.net.feedforward(np.array(arrange_list))  # move[0][0:63]
+			move = self.net.feed_forward(np.array(arrange_list))  # move[0][0:63]
 			move = mathFunc.softmax(move)
 		else:
 			move = np.random.rand(1, 64)  # move[0][0:63]
@@ -216,8 +216,6 @@ class Game(object):
 			row, col = divmod(index, 8)
 			tmp_game.go_next_with_manual_move(row, col)
 			tmp_win_ratio = basicFunc.calc_win_ratio(tmp_game.arrange, tmp_game.nextColor, self.nextColor)
-			# tmp_win_ratio = storeBestMove.calcWinRatio(tmp_game.arrange, tmp_game.nextColor, self.nextColor)
-			# print("    row:%d, col:%d, WinRatio:%f" % (row, col, tmp_win_ratio))
 			if tmp_win_ratio >= win_ratio:
 				best_row, best_col, win_ratio = row, col, tmp_win_ratio
 		return best_row, best_col, win_ratio

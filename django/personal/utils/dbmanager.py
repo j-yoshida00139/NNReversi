@@ -1,5 +1,6 @@
 import numpy as np
 from personal.models import BestMove
+from personal.utils import basicFunc
 
 
 def decode_db_arrange(first_int, last_int):
@@ -12,7 +13,7 @@ def decode_db_arrange(first_int, last_int):
 	return game_arrange
 
 
-def flip_two_dim_list(two_dim_arrange, way):
+def flip_2dim_list(two_dim_arrange, way):
 	if way == "Horizontal":
 		axis = 1
 	elif way == "Vertical":
@@ -30,7 +31,7 @@ def flip_arrange_int(arrange_int, way):
 	first_half, last_half = BestMove.get_first_last_arrange_int(arrange_int)
 	game_arrange = decode_db_arrange(first_half, last_half)
 	two_dim_arrange = np.array(game_arrange).reshape(8, 8).tolist()
-	flipped_arrange = np.array(flip_two_dim_list(two_dim_arrange, way)).reshape(64).tolist()
+	flipped_arrange = np.array(flip_2dim_list(two_dim_arrange, way)).reshape(64).tolist()
 	new_arrange_int = 0
 	for val in flipped_arrange:
 		new_arrange_int = new_arrange_int * 3 + int(val)
@@ -44,7 +45,52 @@ def flip_move_int(move_int, way):
 	if not way == "Horizontal" and not way == "Vertical":
 		raise BaseException("2nd argument should be 'Horizontal' or 'Vertical'")
 	two_dim_move = np.array(decode_db_move(move_int)).reshape(8, 8)
-	symm_move_64 = flip_two_dim_list(two_dim_move, way)
+	symm_move_64 = flip_2dim_list(two_dim_move, way)
+	np_move_array = np.array(symm_move_64).reshape(64)
+	converted_move_int = np.argmax(np_move_array)
+	return converted_move_int
+
+
+def rotate_2dim_list_90deg(two_dim_arrange):
+	rotated = []
+	for row_index in reversed(range(len(two_dim_arrange))):
+		rotated_row = []
+		for col_index in range(len(two_dim_arrange[row_index])):
+			rotated_row.append(two_dim_arrange[col_index][row_index])
+		rotated.append(rotated_row)
+	return rotated
+
+
+def rotate_2dim_list(two_dim_arrange, degree):
+	if not degree % 90 == 0:
+		raise BaseException("argument 'degree' should be multiple of 90.")
+	rotated = basicFunc.unshared_copy(two_dim_arrange)
+	for i in range(int(degree/90)):
+		rotated = rotate_2dim_list_90deg(rotated)
+	return rotated
+
+
+def rotate_arrange_int(arrange_int, degree):
+	if not degree % 90 == 0:
+		raise BaseException("argument 'degree' should be multiple of 90.")
+	first_half, last_half = BestMove.get_first_last_arrange_int(arrange_int)
+	game_arrange = decode_db_arrange(first_half, last_half)
+	two_dim_arrange = np.array(game_arrange).reshape(8, 8).tolist()
+	flipped_arrange = np.array(rotate_2dim_list(two_dim_arrange, degree)).reshape(64).tolist()
+	new_arrange_int = 0
+	for val in flipped_arrange:
+		new_arrange_int = new_arrange_int * 3 + int(val)
+	return new_arrange_int
+
+
+def rotate_move_int(move_int, degree):
+	if not move_int >= 0 or not move_int < 64:
+		raise BaseException(
+			"Argument should be between 0 and 63, but it's {0}".format(move_int))
+	if not degree % 90 == 0:
+		raise BaseException("argument 'degree' should be multiple of 90.")
+	two_dim_move = np.array(decode_db_move(move_int)).reshape(8, 8)
+	symm_move_64 = rotate_2dim_list(two_dim_move, degree)
 	np_move_array = np.array(symm_move_64).reshape(64)
 	converted_move_int = np.argmax(np_move_array)
 	return converted_move_int
