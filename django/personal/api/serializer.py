@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import BestMove
+from ..models import BestMove
 
 
 class BestMoveSerializer(serializers.ModelSerializer):
