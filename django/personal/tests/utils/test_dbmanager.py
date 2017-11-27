@@ -1,6 +1,6 @@
 import pytest
 
-from personal.utils.dbmanager import *
+from ...utils.dbmanager import *
 
 pytestmark = pytest.mark.django_db
 

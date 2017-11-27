@@ -1,4 +1,4 @@
-from personal.utils.mathFunc import *
+from ...utils.mathFunc import *
 
 
 def test_sigmoid():

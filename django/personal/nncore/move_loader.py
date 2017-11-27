@@ -7,7 +7,7 @@ A library to load the move data of reversi.
 import math
 import random
 import numpy as np
-from personal.utils import dbmanager
+from ..utils import dbmanager
 
 
 def load_data(batch_size, flatten=True):

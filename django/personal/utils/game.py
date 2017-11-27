@@ -1,7 +1,7 @@
-from personal.nncore import network
-from personal.utils import basicFunc
-from personal.utils import mathFunc
-from personal.models import BestMove
+from ..nncore import network
+from ..models import BestMove
+from . import basicFunc
+from . import mathFunc
 import math
 import numpy as np
 

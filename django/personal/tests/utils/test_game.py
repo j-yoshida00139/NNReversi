@@ -1,5 +1,5 @@
 import pytest
-from personal.utils.game import *
+from ...utils.game import *
 
 
 pytestmark = pytest.mark.django_db

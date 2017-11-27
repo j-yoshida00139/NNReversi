@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.middleware.csrf import get_token
+# from django.middleware.csrf import get_token
 from rest_framework import viewsets
 from .serializer import BestMoveSerializer
 from .models import BestMove

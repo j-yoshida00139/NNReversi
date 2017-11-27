@@ -1,6 +1,6 @@
 import numpy as np
-from personal.models import BestMove
-from personal.utils import basicFunc
+from ..models import BestMove
+from ..utils import basicFunc
 
 
 def decode_db_arrange(first_int, last_int):

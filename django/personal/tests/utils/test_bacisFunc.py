@@ -1,7 +1,7 @@
 import pytest
 
-from personal.utils.basicFunc import *
-from personal.utils.game import Game
+from ...utils.basicFunc import *
+from ...utils.game import Game
 
 pytestmark = pytest.mark.django_db
 

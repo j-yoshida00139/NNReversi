@@ -2,7 +2,7 @@
 import sys, os
 
 import numpy as np
-from personal.utils.optimizer import SGD, Momentum, Nesterov, AdaGrad, RMSprop, Adam
+from .optimizer import SGD, Momentum, Nesterov, AdaGrad, RMSprop, Adam
 
 
 class Trainer:
