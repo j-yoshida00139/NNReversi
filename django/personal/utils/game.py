@@ -1,7 +1,7 @@
-from personal.nncore import network
-from personal.utils import basicFunc
-from personal.utils import mathFunc
-from personal.models import BestMove
+from ..nncore import network
+from ..models import BestMove
+from . import basicFunc
+from . import mathFunc
 import math
 import numpy as np
 
@@ -130,8 +130,10 @@ class Game(object):
 	def get_winners_data(self):
 		if self.get_score(self.BLACK) > self.get_score(self.WHITE):
 			return self.blackMove
-		else:
+		elif self.get_score(self.BLACK) < self.get_score(self.WHITE):
 			return self.whiteMove
+		else:
+			return None
 
 	def go_next_turn(self):
 		self.nextColor = self.WHITE if self.nextColor == self.BLACK else self.BLACK

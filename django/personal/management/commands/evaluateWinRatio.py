@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from personal.utils.game import Game
+from ...utils.game import Game
 import random
 
 

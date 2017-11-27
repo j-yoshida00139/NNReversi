@@ -1,6 +1,6 @@
 import numpy as np
 import random
-from personal.utils import game
+from . import game
 
 
 def unshared_copy(in_list):

@@ -1,6 +1,6 @@
 import numpy as np
-from personal.utils import mathFunc
-from personal.utils.util import im2col, col2im
+from ..utils import mathFunc
+from ..utils.util import im2col, col2im
 
 
 class AffineLayer(object):

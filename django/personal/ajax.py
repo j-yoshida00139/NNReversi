@@ -1,11 +1,9 @@
 import json
-
 import numpy as np
 from django.http import Http404, HttpResponse
-
-from personal.models import BestMove
-from personal.nncore import network
-from personal.utils import basicFunc, mathFunc, game
+from .models import BestMove
+from .nncore import network
+from .utils import basicFunc, mathFunc, game
 
 n_input = 192
 n_neutral_neuron = 100

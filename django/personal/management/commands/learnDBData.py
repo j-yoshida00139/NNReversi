@@ -1,8 +1,8 @@
 from django.core.management.base import BaseCommand
-from personal.nncore import move_loader
-from personal.nncore import network
-from personal.utils.trainer import Trainer
-from personal.models import BestMove
+from ...nncore import move_loader
+from ...nncore import network
+from ...utils.trainer import Trainer
+from ...models import BestMove
 import math
 
 
