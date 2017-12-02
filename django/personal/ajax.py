@@ -1,45 +1,21 @@
 import json
-import numpy as np
 from django.http import Http404, HttpResponse
 from .models import BestMove
-from .nncore import network
-from .utils import basicFunc, mathFunc, game
+from .utils import game
 
-n_input = 192
-n_neutral_neuron = 100
-n_output = 64
-NONE = 0
 ROWS = 8
 COLS = 8
-mainGame = game.Game(ROWS, COLS)
 
 
 def next_move(request):
 	if request.is_ajax() and request.method == 'POST':
 		arrange = request.POST.get('arrange')
 		color_int = int(request.POST.get('color'))
-		can_put = request.POST.get('canPutList')
-
 		arrange_array = json.loads(arrange)
-		can_put_list = json.loads(can_put)
-		arrange_list = BestMove.encode_to_nn_arrange(arrange_array, color_int)
-		arrange_list = basicFunc.conv_input(arrange_list)
-
-		net = network.Network()
-		result = net.feed_forward(arrange_list)
-		result_list = []
-		for resultValue in result[0]:
-			result_list.append(float(resultValue))
-		result_list = mathFunc.softmax(np.array(result_list))
-
-		output_list = []
-		for i in range(0, len(result_list)-1):
-			output_list.append(float(result_list[i]*can_put_list[i]))
-
-		index = output_list.index(max(output_list))
+		main_game = game.Game(ROWS, COLS, arrange_array, color_int)
+		index = main_game.get_next_move_index_by_nn(arrange_array, color_int)
 		row, col = divmod(index, 8)
-
-		cell_json = json.dumps({"row": row, "col": col})
+		cell_json = json.dumps({"row": int(row), "col": int(col)})
 
 		return HttpResponse(cell_json, content_type='application/json')
 	else:

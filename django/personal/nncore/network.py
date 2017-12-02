@@ -16,7 +16,7 @@ class Network(object):
 					{'filter_num': 32, 'filter_size': 4, 'pad': 2, 'stride': 1},
 					{'filter_num': 64, 'filter_size': 4, 'pad': 2, 'stride': 1},
 					{'filter_num': 64, 'filter_size': 2, 'pad': 1, 'stride': 1}),
-			affineParams=(100, 64)):  # hidden_size=100, output_size=100
+			affine_params=(100, 64)):  # hidden_size=100, output_size=100
 
 		# declare layers ===========
 		self.layers = []
@@ -41,8 +41,8 @@ class Network(object):
 		if os.path.exists("params.pkl"):
 			self.load_params()
 		else:
+			self.init_params(input_dim, conv_params, affine_params)
 			raise BaseException("No params.pkl")
-			self.init_params(input_dim, conv_params, affineParams)
 
 		prm_idx = 0
 		conv_iter = iter(conv_params)

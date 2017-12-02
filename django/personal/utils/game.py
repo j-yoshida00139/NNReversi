@@ -192,15 +192,20 @@ class Game(object):
 
 	def go_next_with_auto_move(self, nn_flag=False):
 		if nn_flag:
-			arrange_list = BestMove.encode_to_nn_arrange(self.arrange, self.nextColor)
-			arrange_list = basicFunc.conv_input(arrange_list)
-			move = self.net.feed_forward(np.array(arrange_list))  # move[0][0:63]
-			move = mathFunc.softmax(move)
+			index = self.get_next_move_index_by_nn(self.arrange, self.nextColor)
 		else:
 			move = np.random.rand(1, 64)  # move[0][0:63]
-		index = np.argmax(move[0] * self.get_can_put_list(self.nextColor))
+			index = np.argmax(move[0] * self.get_can_put_list(self.nextColor))
 		row, col = divmod(index, 8)
 		self.go_next_with_manual_move(row, col)
+
+	def get_next_move_index_by_nn(self, arrange, next_color):
+		arrange_list = BestMove.encode_to_nn_arrange(arrange, next_color)
+		arrange_list = basicFunc.conv_input(arrange_list)
+		move = self.net.feed_forward(np.array(arrange_list))  # move[0][0:63]
+		move = mathFunc.softmax(move)
+		index = np.argmax(move[0] * self.get_can_put_list(next_color))
+		return index
 
 	def go_next_with_manual_move(self, row, col):
 		self.store_move(row, col, self.nextColor)
