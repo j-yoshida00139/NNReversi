@@ -8,16 +8,18 @@ RUN mkdir -p /opt/NNReversi/django && cd /opt/NNReversi \
     && mkdir -p /var/run/nnreversi /var/log/nnreversi \
     && chown www-data:www-data /var/run/nnreversi /var/log/nnreversi
 
+COPY environment/requirements.txt /opt/NNReversi/requirements.txt
+
+RUN cd /opt/NNReversi && pyvenv venv && . venv/bin/activate \
+    && pip install --upgrade pip \
+    && pip install -r /opt/NNReversi/requirements.txt
+
 COPY django /opt/NNReversi/django
 COPY environment/nnreversi.conf /etc/nginx/sites-available/nnreversi.conf
 
 RUN rm /etc/nginx/sites-enabled/default \
     && ln -s /etc/nginx/sites-available/nnreversi.conf /etc/nginx/sites-enabled/nnreversi.conf \
     && touch /opt/NNReversi/django/django.log && chown -R www-data.www-data /opt/NNReversi/django
-
-RUN cd /opt/NNReversi && pyvenv venv && . venv/bin/activate \
-    && pip install --upgrade pip \
-    && pip install -r /opt/NNReversi/django/requirements.txt
 
 STOPSIGNAL SIGTERM
 

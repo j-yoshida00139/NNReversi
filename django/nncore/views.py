@@ -14,7 +14,7 @@ net = network.Network()
 def forward(request):
 	# csrf_token = get_token(request)
 	if request.method == 'POST':
-		nn_input_str = request.body
+		nn_input_str = request.body.decode('utf-8')
 		# nn_input_str = request.POST.get('nn_input')
 		nn_input_list = json.loads(nn_input_str)
 		nn_input_nparray = np.array(nn_input_list["nn_input"])
