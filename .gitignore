@@ -1,3 +1,4 @@
 .idea
 __pycache__/
 django/db.sqlite3
+debug.log
