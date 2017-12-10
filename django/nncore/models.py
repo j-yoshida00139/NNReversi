@@ -10,3 +10,9 @@ class NNModel(models.Model):
 	description = models.TextField(null=False, default='')
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
+
+
+class NNMove(models.Model):
+
+	class Meta:
+		managed = False

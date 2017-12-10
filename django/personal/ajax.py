@@ -14,6 +14,7 @@ def next_move(request):
 		arrange_array = json.loads(arrange)
 		main_game = game.Game(ROWS, COLS, arrange_array, color_int)
 		index = main_game.get_next_move_index_by_nn(arrange_array, color_int)
+		# index = main_game.get_next_move_index_by_nn(arrange_array, color_int, request.get_host())
 		row, col = divmod(index, 8)
 		cell_json = json.dumps({"row": int(row), "col": int(col)})
 

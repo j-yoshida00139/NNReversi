@@ -3,7 +3,6 @@
 <head>
     <title>NNReversi</title>
 
-    <link href="https://fonts.googleapis.com/css?family=Lato:100" rel="stylesheet" type="text/css">
 
     <style>
         #reversi_board {
@@ -13,11 +12,10 @@
             margin: 20px; 
         }
     </style>
-    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
 
 	{% load staticfiles %}
-    <script type="text/javascript" src="{% static 'personal/js/js.cookie.js' %}"></script>
-    <script type="text/javascript" src="{% static 'personal/js/ajax_csrf.js' %}"></script>
+    <link href="{% static 'personal/css/googlefonts.css' %}" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="{% static 'personal/js/jquery-1.11.1.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'personal/js/Game.js' %}"></script>
     <script type="text/javascript" src="{% static 'personal/js/draw.js' %}"></script>
 </head>

@@ -1,9 +1,12 @@
 from ..nncore import network
 from ..models import BestMove
 from . import basicFunc
-from . import mathFunc
 import math
 import numpy as np
+import requests
+import json
+from . import mathFunc
+
 
 directions = [
 	{"row":  0, "col":  1},
@@ -200,8 +203,17 @@ class Game(object):
 		self.go_next_with_manual_move(row, col)
 
 	def get_next_move_index_by_nn(self, arrange, next_color):
+	# def get_next_move_index_by_nn(self, arrange, next_color, host):
 		arrange_list = BestMove.encode_to_nn_arrange(arrange, next_color)
-		arrange_list = basicFunc.conv_input(arrange_list)
+		arrange_list = basicFunc.conv_input(arrange_list)  # arrange_list[0][0:2][0:7][0:7]
+		# arrange_list = arrange_list.tolist()
+		# url = "http://nnreversi.tgen.jp.net/nncore/forward/"
+		# url = "http://" + host + "/nncore/forward/"
+		# payload = {'nn_input': arrange_list}
+		# headers = {'content-type': 'application/json', 'Accept-Charset': 'UTF-8'}
+		# r = requests.post(url, data=json.dumps(payload), headers=headers)
+		# move = r.json()["nn_output"]
+		# index = np.argmax(np.array(move[0]) * self.get_can_put_list(next_color))
 		move = self.net.feed_forward(np.array(arrange_list))  # move[0][0:63]
 		move = mathFunc.softmax(move)
 		index = np.argmax(move[0] * self.get_can_put_list(next_color))
