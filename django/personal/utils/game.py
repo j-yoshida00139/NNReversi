@@ -1,11 +1,9 @@
-from ..nncore import network
 from ..models import BestMove
 from . import basicFunc
 import math
 import numpy as np
 import requests
 import json
-from . import mathFunc
 
 
 directions = [
@@ -19,8 +17,6 @@ directions = [
 	{"row":  1, "col":  1}
 ]
 
-net = network.Network()
-
 
 class Game(object):
 	def __init__(self, rows, cols, arrange_list=[], next_color=0):
@@ -33,7 +29,6 @@ class Game(object):
 		self.blackMove = []
 		self.whiteMove = []
 		self.nextColor = self.BLACK if next_color == 0 else next_color
-		self.net = net
 
 	def initialize(self):
 		up_row = math.floor((self.rows-1)/2)
