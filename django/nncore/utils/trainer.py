@@ -1,7 +1,7 @@
 # coding: utf-8
-import sys, os
 
 import numpy as np
+
 from .optimizer import SGD, Momentum, Nesterov, AdaGrad, RMSprop, Adam
 
 

@@ -1,8 +1,7 @@
-from django.shortcuts import render
 from .src import network
 from .utils import mathFunc
 from django.http import Http404, HttpResponse
-from django.middleware.csrf import get_token
+from .utils.trainer import Trainer
 import numpy as np
 import json
 ROWS = 8
@@ -12,10 +11,8 @@ net = network.Network()
 
 
 def forward(request):
-	# csrf_token = get_token(request)
 	if request.method == 'POST':
 		nn_input_str = request.body.decode('utf-8')
-		# nn_input_str = request.POST.get('nn_input')
 		nn_input_list = json.loads(nn_input_str)
 		nn_input_nparray = np.array(nn_input_list["nn_input"])
 		nn_input = nn_input_nparray.reshape(1, 3, 8, 8)
@@ -25,5 +22,27 @@ def forward(request):
 		move_json = json.dumps({"nn_output": move_list})
 
 		return HttpResponse(move_json, content_type='application/json')
+	else:
+		raise Http404
+
+
+def train(request):
+	if request.method == 'POST':
+		nn_input_str = request.body.decode('utf-8')
+		nn_input_list = json.loads(nn_input_str)
+		x_train, t_train, x_test, t_test = \
+			nn_input_list["x_train"], \
+			nn_input_list["t_train"], \
+			nn_input_list["x_test"], \
+			nn_input_list["y_test"]
+		trainer = Trainer(
+			net, x_train, t_train, x_test, t_test,
+			epochs=20, mini_batch_size=100,
+			optimizer='Adam', optimizer_param={'lr': 0.001},
+			evaluate_sample_num_per_epoch=1000)
+		trainer.train()
+		result_json = json.dumps({"status": "OK"})
+
+		return HttpResponse(result_json, content_type='application/json')
 	else:
 		raise Http404

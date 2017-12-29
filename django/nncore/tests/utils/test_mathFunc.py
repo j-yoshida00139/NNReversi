@@ -1,4 +1,4 @@
-from ...utils.mathFunc import *
+from django.nncore.utils.mathFunc import *
 
 
 def test_sigmoid():

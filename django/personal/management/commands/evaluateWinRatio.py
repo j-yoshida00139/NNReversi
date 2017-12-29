@@ -14,9 +14,6 @@ class Command(BaseCommand):
 			while not main_game.is_ended():
 				nn_flag = True if main_game.nextColor == nn_color else False
 				main_game.go_next_with_auto_move(nn_flag)
-			print("%s games was finished. BLACK:%d WHITE:%d" % (
-				i, main_game.get_score(main_game.BLACK), main_game.get_score(main_game.WHITE)))
 			if main_game.get_winners_color() == nn_color:
-				print("AI wins.")
 				num_win += 1
 		print("Win : {0}%".format(float(num_win*100.0/num_games)))

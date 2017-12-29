@@ -1,7 +1,7 @@
-from django.conf.urls import url, include
+from django.conf.urls import url
 from . import views
 
 urlpatterns = [
 	url(r'^forward/$', views.forward, name='forward'),
-	# url(r'^api/', include("api.urls", namespace='api')),
+	url(r'^train/$', views.train, name='train'),
 ]
