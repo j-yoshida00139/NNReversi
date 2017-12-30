@@ -53,12 +53,33 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'mysite.wsgi.application'
 
-DATABASES = {
-	'default': {
-		'ENGINE': 'django.db.backends.sqlite3',
-		'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+
+if 'NNREVERSI_DB_HOSTNAME' in os.environ:
+	DATABASES = {
+		'default': {
+			'ENGINE': 'django.db.backends.mysql',
+			'HOST': os.environ['NNREVERSI_DB_HOSTNAME'],
+			'NAME': os.environ['NNREVERSI_DB_DATABASE'],
+			'USER': os.environ['NNREVERSI_DB_USERNAME'],
+			'PASSWORD': os.environ['NNREVERSI_DB_PASSWORD'],
+			'PORT': os.environ['NNREVERSI_DB_PORT'],
+			'OPTIONS': {
+				'charset': 'utf8mb4',
+				'init_command': "SET sql_mode='STRICT_TRANS_TABLES', innodb_strict_mode=1",
+			},
+			'TEST': {
+				'CHARSET': 'utf8mb4',
+				'COLLATION': 'utf8mb4_unicode_ci',
+			},
+		}
 	}
-}
+else:
+	DATABASES = {
+		'default': {
+			'ENGINE': 'django.db.backends.sqlite3',
+			'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+		}
+	}
 
 AUTH_PASSWORD_VALIDATORS = [
 	{

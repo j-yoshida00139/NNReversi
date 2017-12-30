@@ -16,7 +16,11 @@ class Command(BaseCommand):
 				"last_half_arrangement": bestMove.last_half_arrangement,
 				"move_index": bestMove.move_index
 			}
-			print(data)
-			headers = {'content-type':'application/json', 'Accept-Charset':'UTF-8'}
+			headers = {'content-type': 'application/json', 'Accept-Charset': 'UTF-8'}
 			response = requests.post(url, json=data, headers=headers)
-			print(response)
+			if response.text == \
+				'{"non_field_errors":["The fields first_half_arrangement,' + \
+				' last_half_arrangement must make a unique set."]}':
+				print("The data has already existed")
+			else:
+				print(response)

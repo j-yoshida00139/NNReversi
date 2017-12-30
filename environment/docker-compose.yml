@@ -1,15 +1,42 @@
 version: "2"
 services:
   nnreversi:
+    build:
+      context: ..
+      dockerfile: environment/Dockerfile
     image: "python:django"
     container_name: "nnreversi"
     volumes:
       - "../django:/opt/NNReversi/django"
     ports:
-      - "8000:80"
+      - "80:80"
+    environment:
+      - "DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}"
+      - "NNREVERSI_DB_HOSTNAME=${NNREVERSI_DB_HOSTNAME}"
+      - "NNREVERSI_DB_DATABASE=${NNREVERSI_DB_DATABASE}"
+      - "NNREVERSI_DB_USERNAME=${NNREVERSI_DB_USERNAME}"
+      - "NNREVERSI_DB_PASSWORD=${NNREVERSI_DB_PASSWORD}"
+      - "NNREVERSI_DB_PORT=${NNREVERSI_DB_PORT}"
+      - "NNREVERSI_DJANGO_HOSTNAME=${NNREVERSI_DJANGO_HOSTNAME}"
+      - "NNREVERSI_DJANGO_PORT=${NNREVERSI_DJANGO_PORT}"
     command:
       - "bash"
       - "-c"
-      # - ". /opt/owltlbs/venv/bin/activate && ./manage.py migrate && ./manage.py runserver 0.0.0.0:80"
-      - ". /opt/NNReversi/venv/bin/activate && ./manage.py migrate && service nginx restart && uwsgi --ini /opt/NNReversi/django/mysite/uwsgi.ini"
-      # Dockerfile ディレクトリ移動 & src専用ディレクトリ作る
+      - ". /opt/NNReversi/venv/bin/activate && python manage.py migrate && service nginx restart && uwsgi --ini /opt/NNReversi/django/mysite/uwsgi.ini"
+  db:
+    image: "mysql:5.7"
+    container_name: "db"
+    environment:
+      - "MYSQL_ROOT_PASSWORD=root"
+      - "MYSQL_DATABASE=root"
+    volumes:
+      - "db:/var/lib/mysql"
+    ports:
+      - "3306:3306"
+    command:
+      - "mysqld"
+      - "--character-set-server=utf8mb4"
+      - "--collation-server=utf8mb4_unicode_ci"
+volumes:
+  db:
+    driver: "local"

@@ -1,4 +1,3 @@
-#!/Users/yoshida/.virtualenvs/nnreversi/bin/python
 import os
 import sys
 
