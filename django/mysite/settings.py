@@ -7,6 +7,7 @@ ALLOWED_HOSTS = [
 	'172.17.0.2',
 	'127.0.0.1',
 	'localhost',
+	'ubuntu.local',
 	'nnreversi.tgen.jp.net'
 ]
 

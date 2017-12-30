@@ -9,7 +9,7 @@ services:
     volumes:
       - "../django:/opt/NNReversi/django"
     ports:
-      - "80:80"
+      - "${NNREVERSI_HOST_PORT}:80"
     environment:
       - "DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}"
       - "NNREVERSI_DB_HOSTNAME=${NNREVERSI_DB_HOSTNAME}"
