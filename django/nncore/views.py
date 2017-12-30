@@ -31,10 +31,10 @@ def train(request):
 		nn_input_str = request.body.decode('utf-8')
 		nn_input_list = json.loads(nn_input_str)
 		x_train, t_train, x_test, t_test = \
-			nn_input_list["x_train"], \
-			nn_input_list["t_train"], \
-			nn_input_list["x_test"], \
-			nn_input_list["y_test"]
+			np.array(nn_input_list["x_train"]), \
+			np.array(nn_input_list["t_train"]), \
+			np.array(nn_input_list["x_test"]), \
+			np.array(nn_input_list["t_test"])
 		trainer = Trainer(
 			net, x_train, t_train, x_test, t_test,
 			epochs=20, mini_batch_size=100,

@@ -70,8 +70,8 @@ class Trainer:
 			self.test_acc_list.append(test_acc)
 
 			if self.verbose: print(
-				"=== epoch:" + str(self.current_epoch) + ", train acc:" + str(train_acc) + ", test acc:" + str(
-					test_acc) + " ===")
+				"=== epoch:" + str(self.current_epoch) + ", train acc:" + str(train_acc*100.0) + "%, test acc:" + str(
+					test_acc*100.0) + "% ===")
 		self.current_iter += 1
 
 	def train(self):

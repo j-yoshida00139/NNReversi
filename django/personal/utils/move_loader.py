@@ -7,7 +7,7 @@ A library to load the move data of reversi.
 import math
 import random
 import numpy as np
-from django.nncore.utils import dbmanager
+from . import dbmanager
 
 
 def load_data(batch_size, flatten=True):
