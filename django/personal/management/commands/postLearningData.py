@@ -19,9 +19,11 @@ class Command(BaseCommand):
 			"x_train": x_train.tolist(),
 			"t_train": t_train.tolist(),
 			"x_test": x_test.tolist(),
-			"t_test": t_train.tolist()}
+			"t_test": t_test.tolist()}
 		headers = {'content-type': 'application/json', 'Accept-Charset': 'UTF-8'}
 		response = requests.post(url, data=json.dumps(payload), headers=headers)
+		print(url)
+		print(response.status_code)
 		if response.status_code == 200:
 			print("The data is stored.")
 		else:
