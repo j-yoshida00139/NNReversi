@@ -1,9 +1,9 @@
 from .src import network
 from .utils import mathFunc
 from django.http import Http404, HttpResponse
-from .utils.trainer import Trainer
 import numpy as np
 import json
+import pickle
 ROWS = 8
 COLS = 8
 
@@ -26,21 +26,18 @@ def forward(request):
 		raise Http404
 
 
-def train(request):
+def upload_input(request):
 	if request.method == 'POST':
 		nn_input_str = request.body.decode('utf-8')
 		nn_input_list = json.loads(nn_input_str)
-		x_train, t_train, x_test, t_test = \
+		params = dict()
+		params["x_train"], params["t_train"], params["x_test"], params["t_test"] = \
 			np.array(nn_input_list["x_train"]), \
 			np.array(nn_input_list["t_train"]), \
 			np.array(nn_input_list["x_test"]), \
 			np.array(nn_input_list["t_test"])
-		trainer = Trainer(
-			net, x_train, t_train, x_test, t_test,
-			epochs=20, mini_batch_size=100,
-			optimizer='Adam', optimizer_param={'lr': 0.001},
-			evaluate_sample_num_per_epoch=1000)
-		trainer.train()
+		with open("nncore/input_data/learn_input.pkl", 'wb') as f:
+			pickle.dump(params, f)
 		result_json = json.dumps({"status": "OK"})
 
 		return HttpResponse(result_json, content_type='application/json')
