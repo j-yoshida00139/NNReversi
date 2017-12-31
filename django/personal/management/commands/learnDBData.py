@@ -24,4 +24,4 @@ class Command(BaseCommand):
 				"t_test": t_train.tolist()}
 			headers = {'content-type': 'application/json', 'Accept-Charset': 'UTF-8'}
 			response = requests.post(url, data=json.dumps(payload), headers=headers)
-			print("Finished. Response:" + response)
+			print("Finished.")
