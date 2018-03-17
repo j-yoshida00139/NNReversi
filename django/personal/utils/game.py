@@ -5,7 +5,6 @@ import math
 import numpy as np
 import requests
 import json
-import os
 
 directions = [
 	{"row":  0, "col":  1},
