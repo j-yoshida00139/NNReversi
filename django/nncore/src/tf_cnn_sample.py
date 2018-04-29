@@ -6,46 +6,43 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
-import os
-import pickle
-
 tf.logging.set_verbosity(tf.logging.INFO)
 
+# Our application logic will be added here
 
 def cnn_model_fn(features, labels, mode):
 	"""Model function for CNN."""
 	# Input Layer
-	input_layer = tf.reshape(features["x"], [-1, 8, 8, 3])
+	input_layer = tf.reshape(features["x"], [-1, 28, 28, 1])
 
 	# Convolutional Layer #1
 	conv1 = tf.layers.conv2d(
-		inputs=input_layer, filters=16, kernel_size=[4, 4], padding="same", activation=tf.nn.relu)
+		inputs=input_layer,
+		filters=32,
+		kernel_size=[5, 5],
+		padding="same",
+		activation=tf.nn.relu)
 
 	# Pooling Layer #1
-	# pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)
+	pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)
 
 	# Convolutional Layer #2 and Pooling Layer #2
 	conv2 = tf.layers.conv2d(
-		inputs=conv1, filters=16, kernel_size=[4, 4], padding="same", activation=tf.nn.relu)
-	conv3 = tf.layers.conv2d(
-		inputs=conv2, filters=32, kernel_size=[4, 4], padding="same", activation=tf.nn.relu)
-	conv4 = tf.layers.conv2d(
-		inputs=conv3, filters=32, kernel_size=[4, 4], padding="same", activation=tf.nn.relu)
-	conv5 = tf.layers.conv2d(
-		inputs=conv4, filters=64, kernel_size=[4, 4], padding="same", activation=tf.nn.relu)
-	conv6 = tf.layers.conv2d(
-		inputs=conv5, filters=64, kernel_size=[2, 2], padding="same", activation=tf.nn.relu)
-	# pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
+		inputs=pool1,
+		filters=64,
+		kernel_size=[5, 5],
+		padding="same",
+		activation=tf.nn.relu)
+	pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
 
 	# Dense Layer
-	conv6_flat = tf.reshape(conv6, [-1, 8 * 8 * 64])
-	dense = tf.layers.dense(inputs=conv6_flat, units=1024, activation=tf.nn.relu)
-	# dropout = tf.layers.dropout(
-	# 	inputs=dense, rate=0.2, training=mode == tf.estimator.ModeKeys.TRAIN)
+	pool2_flat = tf.reshape(pool2, [-1, 7 * 7 * 64])
+	dense = tf.layers.dense(inputs=pool2_flat, units=1024, activation=tf.nn.relu)
+	dropout = tf.layers.dropout(
+		inputs=dense, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
 
 	# Logits Layer
-	logits = tf.layers.dense(inputs=dense, units=64)
-	# logits = tf.layers.dense(inputs=dropout, units=64)
+	logits = tf.layers.dense(inputs=dropout, units=10)
 
 	predictions = {
 		# Generate predictions (for PREDICT and EVAL mode)
@@ -63,7 +60,7 @@ def cnn_model_fn(features, labels, mode):
 
 	# Configure the Training Op (for TRAIN mode)
 	if mode == tf.estimator.ModeKeys.TRAIN:
-		optimizer = tf.train.GradientDescentOptimizer(learning_rate=1.0)
+		optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
 		train_op = optimizer.minimize(
 			loss=loss,
 			global_step=tf.train.get_global_step())
@@ -79,25 +76,15 @@ def cnn_model_fn(features, labels, mode):
 
 def main(unused_argv):
 	# Load training and eval data
-
-	file_name = '../input_data/learn_input.pkl'
-	if not os.path.exists(file_name):
-		print('Input data does not exist.')
-		raise BaseException
-	with open(file_name, 'rb') as f:
-		params = pickle.load(f)
-	x_train, t_train, x_test, t_test = params["x_train"], params["t_train"], params["x_test"], params["t_test"]
-	x_train = np.float16(x_train.swapaxes(1, 2).swapaxes(2, 3).reshape(-1, 192))
-	t_train = np.float16(t_train.reshape(-1, 64))
-	x_test = np.float16(x_test.swapaxes(1, 2).swapaxes(2, 3).reshape(-1, 192))
-	t_test = np.float16(t_test.reshape(-1, 64))
-
-	t_train = np.argmax(t_train, axis=1)
-	t_test = np.argmax(t_test, axis=1)
+	mnist = tf.contrib.learn.datasets.load_dataset("mnist")
+	train_data = mnist.train.images # Returns np.array
+	train_labels = np.asarray(mnist.train.labels, dtype=np.int32)
+	eval_data = mnist.test.images # Returns np.array
+	eval_labels = np.asarray(mnist.test.labels, dtype=np.int32)
 
 	# Create the Estimator
 	mnist_classifier = tf.estimator.Estimator(
-		model_fn=cnn_model_fn, model_dir="/tmp/reversi_model")
+		model_fn=cnn_model_fn, model_dir="/tmp/mnist_convnet_model")
 
 	# Set up logging for predictions
 	tensors_to_log = {"probabilities": "softmax_tensor"}
@@ -106,22 +93,20 @@ def main(unused_argv):
 
 	# Train the model
 	train_input_fn = tf.estimator.inputs.numpy_input_fn(
-		x={"x": x_train},
-		y=t_train,
+		x={"x": train_data},
+		y=train_labels,
 		batch_size=100,
-		# batch_size=100,
 		num_epochs=None,
 		shuffle=True)
 	mnist_classifier.train(
 		input_fn=train_input_fn,
-		steps=1000,
-		# steps=20000,
+		steps=20000,
 		hooks=[logging_hook])
 
 	# Evaluate the model and print results
 	eval_input_fn = tf.estimator.inputs.numpy_input_fn(
-		x={"x": x_test},
-		y=t_test,
+		x={"x": eval_data},
+		y=eval_labels,
 		num_epochs=1,
 		shuffle=False)
 	eval_results = mnist_classifier.evaluate(input_fn=eval_input_fn)

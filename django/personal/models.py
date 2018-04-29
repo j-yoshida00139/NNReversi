@@ -47,11 +47,11 @@ class BestMove(models.Model):
 		arrange_1dim = np.array(arrange_2dim).reshape(64).tolist()
 		for color in arrange_1dim:
 			if color == 0:
-				nn_arrange.extend([[float(1)], [float(0)], [float(0)]])
+				nn_arrange.extend([[float(0)], [float(0)], [float(1)]])
 			elif color == player_color:
 				nn_arrange.extend([[float(0)], [float(1)], [float(0)]])
 			else:
-				nn_arrange.extend([[float(0)], [float(0)], [float(1)]])
+				nn_arrange.extend([[float(1)], [float(0)], [float(0)]])
 		return nn_arrange
 
 	@staticmethod
@@ -60,11 +60,11 @@ class BestMove(models.Model):
 		for row_i, row in enumerate(color_arrange):
 			for col_i, col in enumerate(row):
 				if color_arrange[row_i][col_i] == 0:
-					game_arrange.append(2)
+					game_arrange.append(0)
 				elif color_arrange[row_i][col_i] == player_color:
 					game_arrange.append(1)
 				else:
-					game_arrange.append(0)
+					game_arrange.append(2)
 		return game_arrange
 
 	@staticmethod

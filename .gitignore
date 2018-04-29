@@ -1,4 +1,7 @@
 .idea
+.cache/
+.coverage
+.python-version
 __pycache__/
 django/db.sqlite3
 debug.log
@@ -6,3 +9,5 @@ debug.log
 *.pyc
 .envrc
 learn_input.pkl
+htmlcov/
+MNIST-data/

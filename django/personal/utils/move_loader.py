@@ -20,9 +20,13 @@ def load_data(batch_size, flatten=True):
 	"""
 
 	n_total = batch_size
-	n_training = math.floor(batch_size*0.8)
-	n_validation = math.floor(batch_size*0.1)
-	n_test = math.floor(batch_size*0.1)
+	# n_training = math.floor(batch_size*0.8)
+	# n_validation = math.floor(batch_size*0.1)
+	# n_test = math.floor(batch_size*0.1)
+	n_training = 1
+	n_validation = 1
+	n_test = 1
+	n_total = 3
 	x_train_tmp, t_train, x_eva_tmp, t_eva, x_test_tmp, t_test = get_random_data(n_training, n_validation, n_test, n_total)
 	if flatten is False:
 		x_train = np.array([])
