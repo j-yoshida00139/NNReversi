@@ -29,7 +29,7 @@ class Command(BaseCommand):
 					first_half_arrangement=first_int, last_half_arrangement=last_int, move_index=move_int, replicated=True)
 				new_best_move.save_or_update()
 
-			rotated_arrange_int = dbmanager.rotate_arrange_int(arrange_int, degree)
+			rotated_arrange_int = dbmanager.rotate_arrange_int(arrange_int, 90)
 			rotated_move_int = int(dbmanager.rotate_move_int(bestMove.move_index, 90))
 			for direction in direction_list:
 				symm_arrange_int = dbmanager.flip_arrange_int(rotated_arrange_int, direction)

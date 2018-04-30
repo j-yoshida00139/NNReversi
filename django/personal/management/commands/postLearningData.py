@@ -1,16 +1,14 @@
 from django.core.management.base import BaseCommand
 from ...utils import move_loader
-from ...utils import config
 from ...models import BestMove
 import math
-import requests
-import json
 import pickle
 
 
 class Command(BaseCommand):
 	def handle(self, *args, **kwargs):
-		n_batch_size = math.floor(BestMove.objects.all().count() / 20000) * 100
+		n_batch_size = 500
+		# n_batch_size = math.floor(BestMove.objects.all().count() / 20000) * 100
 		print("batch size is :")
 		print(n_batch_size)
 
