@@ -4,7 +4,8 @@ RUN apt-get update && apt-get install -y python3 python3-pip python3-venv cron n
 
 RUN mkdir -p /opt/NNReversi/django && cd /opt/NNReversi \
     && mkdir -p /var/run/nnreversi /var/log/nnreversi \
-    && chown www-data:www-data /var/run/nnreversi /var/log/nnreversi
+    && chown www-data:www-data /var/run/nnreversi /var/log/nnreversi \
+    && touch /var/log/nnreversi/debug.log && chmod -R 777 /var/log/nnreversi
 
 COPY environment/requirements.txt /opt/NNReversi/requirements.txt
 

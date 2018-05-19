@@ -1,6 +1,4 @@
-from .src import network
 from .src import tf_network
-from .utils import mathFunc
 from django.http import Http404, HttpResponse
 import numpy as np
 import json
@@ -8,7 +6,6 @@ import pickle
 ROWS = 8
 COLS = 8
 
-net = network.Network()
 net_tf = tf_network.TfNetwork()
 
 
