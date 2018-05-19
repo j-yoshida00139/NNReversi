@@ -1,4 +1,5 @@
 from .src import network
+from .src import tf_network
 from .utils import mathFunc
 from django.http import Http404, HttpResponse
 import numpy as np
@@ -8,6 +9,7 @@ ROWS = 8
 COLS = 8
 
 net = network.Network()
+net_tf = tf_network.TfNetwork()
 
 
 def forward(request):
@@ -15,10 +17,9 @@ def forward(request):
 		nn_input_str = request.body.decode('utf-8')
 		nn_input_list = json.loads(nn_input_str)
 		nn_input_nparray = np.array(nn_input_list["nn_input"])
-		nn_input = nn_input_nparray.reshape(1, 3, 8, 8)
-		nn_output = net.feed_forward(nn_input)
-		move = mathFunc.softmax(nn_output)
-		move_list = move.tolist()
+		nn_input = np.float16(nn_input_nparray.reshape(1, 3, 8, 8).swapaxes(1, 2).swapaxes(2, 3).reshape(-1, 192))
+		move = net_tf.feed_forward(np.array([nn_input]))
+		move_list = move[0].tolist()
 		move_json = json.dumps({"nn_output": move_list})
 
 		return HttpResponse(move_json, content_type='application/json')
