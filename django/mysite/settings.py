@@ -119,7 +119,7 @@ LOGGING = {
 		'file': {
 			'level': 'DEBUG',
 			'class': 'logging.FileHandler',
-			'filename': 'debug.log',
+			'filename': '/var/log/nnreversi/debug.log',
 		},
 	},
 	'loggers': {
