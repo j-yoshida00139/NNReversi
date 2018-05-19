@@ -22,7 +22,7 @@ services:
     command:
       - "bash"
       - "-c"
-      - ". /opt/NNReversi/venv/bin/activate && python manage.py migrate && service nginx restart && uwsgi --ini /opt/NNReversi/django/mysite/uwsgi.ini"
+      - "sleep 10 && . /opt/NNReversi/venv/bin/activate && python manage.py migrate && service nginx restart && uwsgi --ini /opt/NNReversi/django/mysite/uwsgi.ini"
   db:
     image: "mysql:5.7"
     container_name: "db"

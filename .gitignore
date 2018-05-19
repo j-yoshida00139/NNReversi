@@ -12,3 +12,4 @@ debug.log
 learn_input.pkl
 htmlcov/
 MNIST-data/
+django/nncore/reversi_model/*

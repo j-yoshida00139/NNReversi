@@ -206,7 +206,7 @@ class Game(object):
 		headers = {'content-type': 'application/json', 'Accept-Charset': 'UTF-8'}
 		r = requests.post(url, data=json.dumps(payload), headers=headers)
 		move = r.json()["nn_output"]  # move[0][0:63]
-		index = np.argmax(np.array(move[0]) * self.get_can_put_list(next_color))
+		index = np.argmax(np.array(move) * self.get_can_put_list(next_color))
 		return index
 
 	def go_next_with_manual_move(self, row, col):

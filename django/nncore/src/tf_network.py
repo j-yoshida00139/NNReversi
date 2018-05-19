@@ -11,7 +11,7 @@ tf.logging.set_verbosity(tf.logging.INFO)
 class TfNetwork(object):
 
 	def __init__(self):
-		self.model_path = "/tmp/reversi_model"
+		self.model_path = "nncore/reversi_model"
 
 	@staticmethod
 	def cnn_model_fn(features, labels, mode):
