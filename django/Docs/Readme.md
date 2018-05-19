@@ -15,3 +15,6 @@ Data format
 
 	2 integer values: Converted from ternary to decimal number
 	
+4. Tensorboard command
+
+    tensorboard --logdir=/tmp/reversi_model/
