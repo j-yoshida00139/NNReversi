@@ -28,6 +28,6 @@ venv=$NNREVERSI_VENV
 if [ `count_processes $command` -lt $process_limit ]; then
   cd /opt/NNReversi/django/
   . $venv
-  python manage.py $command
+  python -u manage.py $command
 fi
 

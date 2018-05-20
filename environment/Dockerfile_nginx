@@ -1,0 +1,11 @@
+FROM ubuntu:16.04
+
+RUN apt-get update && apt-get install -y nginx
+
+COPY environment/proxy.conf /etc/nginx/sites-available/proxy.conf
+
+RUN rm /etc/nginx/sites-enabled/default \
+    && ln -s /etc/nginx/sites-available/proxy.conf /etc/nginx/sites-enabled/proxy.conf
+STOPSIGNAL SIGTERM
+
+CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
